@@ -1,0 +1,62 @@
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {
+        'packages':['geochart'],
+        // Note: you will need to get a mapsApiKey for your project.
+        // See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings
+        'mapsApiKey': 'AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY'
+      });
+	google.charts.setOnLoadCallback(drawRegionsMap);
+
+	function drawRegionsMap() {
+	var data = google.visualization.arrayToDataTable([
+		['Country',   'Rating'],
+		['Philippines', 3], 
+		['China', 1]
+	]);
+
+	var options = {
+		region: '142',// Asia
+		colorAxis: {
+		colors: [
+			'#00853f', // 1
+			'#3F9B39', // 2
+			'#7FB234', // 3
+			'#BFC82E', // 4
+			'#BFC82E', // 5
+			'#F8AE27', // 6
+			'#F8AE27', // 7
+			'#F17D26', // 8
+			'#EA4C24', // 9
+			'#E31B23', // 10
+			], 
+			values: [1,2,3,4,5,6,7,8,9,10]
+		},
+		backgroundColor: '#81d4fa',
+		displayMode: 'regions',
+		datalessRegionColor: '#0000FF',
+		defaultColor: '#f5f5f5',
+	};
+
+
+
+	var chart = new google.visualization.GeoChart(document.getElementById('geochart-colors'));
+		chart.draw(data, options);
+	};
+
+
+
+    </script>
+  </head>
+  <body>
+    <div id="geochart-colors" style="width: 700px; height: 433px;"></div>
+  </body>
+</html>
+
+
+
+
+
+
