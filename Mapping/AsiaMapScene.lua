@@ -1,45 +1,35 @@
-
-
-
-
 --  asia Map Scene
 
-
-
-
 local composer = require( "composer" )
- 
 local scene = composer.newScene()
  
--- -----------------------------------------------------------------------------------
--- Code outside of the scene event functions below will only be executed ONCE unless
--- the scene is removed entirely (not recycled) via "composer.removeScene()"
--- -----------------------------------------------------------------------------------
-
-
-
 -- -----------------------------------------------------------------------------------
 -- Scene event functions
 -- -----------------------------------------------------------------------------------
 
-function BEGIN()
-io.write([[
-	<HTML>
-	<HEAD><TITLE>Projects using Lua</TITLE></HEAD>
-	<BODY BGCOLOR="#FFFFFF">
-	Here are brief descriptions of some projects around the
-	world that use <A HREF="home.html">Lua</A>.
-	<BR>
-	]])
-end
-
 -- create()
 function scene:create( event )
-    screenGroup = self.view
-    -- Code here runs when the scene is first created but has not yet appeared on screen
+    local screenGroup = self.view
 	
-    local webView = native.newWebView( display.contentCenterX, display.contentCenterY, 500, 480 )
-    webView:request( "geomapAsia.html", system.ResourceDirectory )
+    -- Code here runs when the scene is first created but has not yet appeared on screen
+	local container = display.newGroup()
+
+	local top = 0
+	local left = 0
+	local bottom = content_height
+	local right = content_width
+
+	local content = display.newRect( left, top, right, bottom )
+	content:setFillColor(0.4, 0.4, 0.4)
+	content.anchorX = 0
+	content.anchorY = 0
+
+	container:insert(content)
+
+	local webView = native.newWebView( display.contentCenterX, display.contentCenterY, content_width, content_height )
+    webView:request( "Asia-map.html", system.DocumentsDirectory )
+	
+	container:insert(webView)
 end
  
  
