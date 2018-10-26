@@ -138,7 +138,7 @@ local function saveCountryData(region, country)
 	file = nil
 end
 
--- Function to set a country's single characteristic value
+-- Function to set a country's characteristics value
 --  IDEA: have a drop-down menu with the values: No data, Present, Not present
 --         in the edit country details page
 local function setCountryData(region, country, characteristic, value)
