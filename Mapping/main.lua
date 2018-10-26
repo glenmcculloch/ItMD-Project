@@ -77,6 +77,7 @@ local function loadCountries()
 end
 
 -- Function to load specific country settings from file
+--  (if not found it defaults to nil for each characteristic)
 local function loadCountryData(region, country)
 	local path = system.pathForFile(string.format("%s.data", country), system.DocumentsDirectory)
 	local file, errorString = io.open(path, "r")
@@ -135,6 +136,30 @@ local function saveCountryData(region, country)
 	end
 	
 	file = nil
+end
+
+-- Function to set a country's single characteristic value
+--  IDEA: have a drop-down menu with the values: No data, Present, Not present
+--         in the edit country details page
+local function setCountryData(region, country, characteristic, value)
+	-- TO DO: get values from edit-country form and set the characteristics
+	
+	--[[
+	countries[region][country][characteristic] = torture_field_value
+	countries[region][country][characteristic] = deathpenalty_field_value
+	...
+	saveCountryData(region, country)
+	]]--
+end
+
+-- This function is used to determine a country's rating depending on its characteristics
+--  WE NEED TO GET CHARACTERISTIC VALUES FROM THE CLIENT TO COMPLETE THIS
+--   RIGHT NOW RATINGS ARE DETERMINED RANDOMLY ON APPLICATION STARTUP
+local function getCountryRating(region, country)
+	-- default rating is 0 (no data)
+	local rating = 0
+	
+	--[[CODE TO ADD]]--
 end
 
 -- Function that creates an html page for our webview. This will be saved in documents directory
