@@ -42,40 +42,6 @@ function split(s, token)
     return result;
 end
 
--- Function to load countries from file (for searches and saved data)
-local function loadCountries()
-	local path = system.pathForFile("countryList.txt", system.ResourceDirectory)
-	local file, errorString = io.open(path, "r")
-
-	if not file then
-		print("File error: " .. errorString)
-	else
-		local region
-		-- iterate through each line in the file
-		for line in io.lines(path) do
-			-- length is 0, ignore this line
-			if line:len() ~= 0 then
-				-- line includes a region
-				if string.find(line, "%[") ~= nil then
-					-- remove [ and ]
-					line = string.gsub(line, "%[", '')
-					line = string.gsub(line, "%]", '')
-					
-					region = line
-					
-					-- initialise region table
-					countries[region] = {}
-				elseif region ~= nil then
-					countries[region][line] = loadCountryData(region, line)
-				end
-			end
-		end
-		io.close( file )
-	end
-	
-	file = nil
-end
-
 -- Function to load specific country settings from file
 --  (if not found it defaults to nil for each characteristic)
 local function loadCountryData(region, country)
@@ -159,11 +125,19 @@ local function getCountryRating(region, country)
 	-- default rating is 0 (no data)
 	local rating = 0
 	
-	--[[CODE TO ADD]]--
+	--[[CODE TO ADD (EXAMPLE)
+	
+	if torture_present then
+		rating = ???
+	elseif incarceration_present then
+		rating = ???
+	end
+	
+	return rating
+	]]--
 end
 
 -- Function that creates an html page for our webview. This will be saved in documents directory
---  and be used for our webview
 local function createHTMLFile(region)
 	local path = system.pathForFile(string.format("%s-map.html", region), system.DocumentsDirectory)
 	local file, errorString = io.open(path, "w")
@@ -239,8 +213,22 @@ local function createHTMLFile(region)
 		]);
 		
 		var chart = new google.visualization.GeoChart(document.getElementById('geochart-colors'));
+		
+		google.visualization.events.addListener(chart, 'select', function(e) {
+			var selection = chart.getSelection();
+			if (selection.length == 1) {
+				var selectedRow = selection[0].row;
+				var selectedRegion = data.getFormattedValue(selection[0].row, 0);
+				var event = new Event(selectedRegion);
+				
+				document.addEventListener(selectedRegion, function(e){}, false);
+				document.dispatchEvent(event);
+			}
+		});
+		
 		chart.draw(data, options);
 	}
+	
 	</script>
   </head>
   <body>
@@ -281,6 +269,40 @@ local function saveCountryData(region)
 		
 		file:write(string.format("</%s>", region))
 		file:close()
+	end
+	
+	file = nil
+end
+
+-- Function to load countries from file (for searches and saved data)
+local function loadCountries()
+	local path = system.pathForFile("countryList.txt", system.ResourceDirectory)
+	local file, errorString = io.open(path, "r")
+
+	if not file then
+		print("File error: " .. errorString)
+	else
+		local region
+		-- iterate through each line in the file
+		for line in io.lines(path) do
+			-- length is 0, ignore this line
+			if line:len() ~= 0 then
+				-- line includes a region
+				if string.find(line, "%[") ~= nil then
+					-- remove [ and ]
+					line = string.gsub(line, "%[", '')
+					line = string.gsub(line, "%]", '')
+					
+					region = line
+					
+					-- initialise region table
+					countries[region] = {}
+				elseif region ~= nil then
+					countries[region][line] = loadCountryData(region, line)
+				end
+			end
+		end
+		io.close( file )
 	end
 	
 	file = nil

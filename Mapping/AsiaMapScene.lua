@@ -11,27 +11,28 @@ local scene = composer.newScene()
 function scene:create( event )
     local screenGroup = self.view
 	
-    -- Code here runs when the scene is first created but has not yet appeared on screen
-	local container = display.newGroup()
-
-	local top = 0
-	local left = 0
-	local bottom = content_height
-	local right = content_width
-
-	local content = display.newRect( left, top, right, bottom )
-	content:setFillColor(0.4, 0.4, 0.4)
-	content.anchorX = 0
-	content.anchorY = 0
-
-	container:insert(content)
-
 	local webView = native.newWebView( display.contentCenterX, display.contentCenterY, content_width, content_height )
     webView:request( "Asia-map.html", system.DocumentsDirectory )
 	
-	container:insert(webView)
+	webView:addEventListener( "urlRequest", webViewListener )
 end
- 
+
+-- listener for our webview
+function webViewListener(event)
+	if event.url then
+		print("EVENT URL FOUND")
+		if (event.type == "other") then
+			print("EVENT TYPE IS OTHER")
+			local urlString = url.unescape(event.url)
+			local start, ends = string.find(urlString, "<country>")
+			if start ~= nil then
+				local myString = string.sub(urlString, ends + 1)
+				
+				print(myString)
+			end
+		end
+	end
+end
  
 -- show()
 function scene:show( event )
