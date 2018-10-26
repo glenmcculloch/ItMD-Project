@@ -15,6 +15,15 @@ region_id = {
 	['Oceania'] = '009'
 }
 
+-- all country characteristics
+country_characteristic = {
+	['Torture'] = nil, 
+	['Death Penalty'] = nil, 
+	['Conflict'] = nil, 
+	['State of Oppression'] = nil, 
+	['Legal Torture'] = nil
+}
+
 content_height = display.actualContentHeight
 content_width = display.actualContentWidth
 
@@ -23,6 +32,15 @@ content_width = display.actualContentWidth
 -- File-Related functions
 --
 -----------------------------------------------------------------------------------------
+
+-- Function to split a string given a token
+function split(s, token)
+    result = {};
+    for match in (s..token):gmatch("(.-)"..token) do
+        table.insert(result, match);
+    end
+    return result;
+end
 
 -- Function to load countries from file (for searches and saved data)
 local function loadCountries()
@@ -48,8 +66,7 @@ local function loadCountries()
 					-- initialise region table
 					countries[region] = {}
 				elseif region ~= nil then
-					-- initialise country table
-					countries[region][line] = {}
+					countries[region][line] = loadCountryData(region, line)
 				end
 			end
 		end
@@ -59,31 +76,61 @@ local function loadCountries()
 	file = nil
 end
 
--- Function that creates dynamic XML file for a given region 
---  (the html file will then load this to colour the map)
-local function createDataFile(region)
-	local path = system.pathForFile(string.format("%s-data.xml", region), system.DocumentsDirectory)
+-- Function to load specific country settings from file
+local function loadCountryData(region, country)
+	local path = system.pathForFile(string.format("%s.data", country), system.DocumentsDirectory)
+	local file, errorString = io.open(path, "r")
+	
+	local result = {}
+
+	if file then
+		local s
+		for line in io.lines(path) do
+			if line:len() ~= 0 then
+				-- split the line (format characteristic=value)
+				s = split(line, "=")
+				
+				if s[1] == "Additional Information" then
+					result[s[1]] = s[2]
+				elseif s[2] == "nil" then
+					result[s[1]] = nil
+				elseif s[2] == "true" then
+					result[s[1]] = true
+				elseif s[2] == "false" then
+					result[s[1]] = false
+				end
+			end
+		end
+		io.close(file)
+	else
+		result = country_characteristic
+	end
+	
+	file = nil
+	return result
+end
+
+-- Function to load countries from file (for searches and saved data)
+local function saveCountryData(region, country)
+	local path = system.pathForFile(string.format("%s.data", country), system.DocumentsDirectory)
 	local file, errorString = io.open(path, "w")
 
 	if not file then
 		print("File error: " .. errorString)
 	else
-		local line, country
-		
-		file:write(string.format("<%s>\n", region))
-		
-		-- iterate through all countries within the given region
-		for key, value in pairs(countries) do
-			if key == region then
-				for key, value in pairs(value) do
-					country = string.gsub(key, "% ", "-")
-					
-					file:write(string.format("\t<country>\n\t\t<name>%s</name>\n\t\t<rating>%i</rating>\n\t</country>\n", country, math.random(0, 10)))
-				end
+		local line
+		for key,value in pairs(countries[region][country]) do
+			if key == "Additional Information" then
+				file:write(string.format("Additional Information=%s", value))
+			elseif value == nil then
+				file:write(string.format("%s=nil", key))
+			elseif value == true then
+				file:write(string.format("%s=true", key))
+			elseif value == false then
+				file:write(string.format("%s=false", key))
 			end
 		end
 		
-		file:write(string.format("</%s>", region))
 		file:close()
 	end
 	
@@ -177,6 +224,37 @@ local function createHTMLFile(region)
 </html>]])
 		
 		file:write(line)
+		file:close()
+	end
+	
+	file = nil
+end
+
+-- Function that saves our region data to persistent storage
+--  (the html file will then load this to colour the map)
+local function saveCountryData(region)
+	local path = system.pathForFile(string.format("%s-data.xml", region), system.DocumentsDirectory)
+	local file, errorString = io.open(path, "w")
+
+	if not file then
+		print("File error: " .. errorString)
+	else
+		local line, country
+		
+		file:write(string.format("<%s>\n", region))
+		
+		-- iterate through all countries within the given region
+		for key, value in pairs(countries) do
+			if key == region then
+				for key, value in pairs(value) do
+					country = string.gsub(key, "% ", "-")
+					
+					file:write(string.format("\t<country>\n\t\t<name>%s</name>\n\t\t<rating>%i</rating>\n\t</country>\n", country, math.random(0, 10)))
+				end
+			end
+		end
+		
+		file:write(string.format("</%s>", region))
 		file:close()
 	end
 	
