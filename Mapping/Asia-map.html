@@ -39,56 +39,56 @@
 		
 		var data = google.visualization.arrayToDataTable([
 			['Country', 'Rating'] ,
-			['Mongolia', 0] ,
-			['Laos', 5] ,
+			['Mongolia', 6] ,
+			['Laos', 3] ,
 			['Armenia', 2] ,
-			['Kazakhstan', 8] ,
-			['Israel', 10] ,
-			['Bhutan', 5] ,
+			['Kazakhstan', 7] ,
+			['Israel', 0] ,
+			['Bhutan', 1] ,
 			['Afghanistan', 2] ,
-			['Bangladesh', 3] ,
-			['Iran', 4] ,
-			['Yemen', 5] ,
-			['Vietnam', 2] ,
-			['Uzbekistan', 4] ,
-			['Singapore', 6] ,
-			['United Arab Emirates', 4] ,
-			['Turkmenistan', 3] ,
-			['Turkey', 3] ,
-			['Timor-Leste', 6] ,
-			['Thailand', 4] ,
-			['Myanmar', 4] ,
-			['Taiwan', 3] ,
-			['Syria', 4] ,
-			['Saudi Arabia', 3] ,
-			['Sri Lanka', 8] ,
-			['Russia', 9] ,
-			['Tajikistan', 3] ,
-			['Qatar', 5] ,
-			['Philippines', 0] ,
-			['Lebanon', 3] ,
-			['Azerbaijan', 9] ,
-			['Jordan', 4] ,
-			['Palestine', 3] ,
-			['Indonesia', 2] ,
-			['China', 8] ,
-			['Bahrain', 6] ,
-			['Malaysia', 6] ,
-			['Pakistan', 6] ,
-			['Cyprus', 8] ,
-			['Brunei', 0] ,
-			['Georgia', 3] ,
+			['Bangladesh', 1] ,
+			['Iran', 7] ,
+			['Yemen', 10] ,
+			['Vietnam', 4] ,
+			['Uzbekistan', 2] ,
+			['Singapore', 8] ,
+			['United Arab Emirates', 1] ,
+			['Turkmenistan', 8] ,
+			['Turkey', 7] ,
+			['Timor-Leste', 7] ,
+			['Thailand', 1] ,
+			['Myanmar', 9] ,
+			['Taiwan', 7] ,
+			['Syria', 2] ,
+			['Saudi Arabia', 4] ,
+			['Sri Lanka', 6] ,
+			['Russia', 8] ,
+			['Tajikistan', 5] ,
+			['Qatar', 7] ,
+			['Philippines', 3] ,
+			['Lebanon', 6] ,
+			['Azerbaijan', 10] ,
+			['Jordan', 9] ,
+			['Palestine', 9] ,
+			['Indonesia', 1] ,
+			['China', 6] ,
+			['Bahrain', 5] ,
+			['Malaysia', 5] ,
+			['Pakistan', 10] ,
+			['Cyprus', 3] ,
+			['Brunei', 1] ,
+			['Georgia', 10] ,
 			['Kyrgyzstan', 4] ,
 			['Oman', 7] ,
-			['India', 5] ,
-			['Nepal', 10] ,
-			['South Korea', 7] ,
-			['Maldives', 0] ,
-			['Iraq', 3] ,
-			['Cambodia', 9] ,
-			['Kuwait', 4] ,
-			['Japan', 1] ,
-			['North Korea', 2] 		
+			['India', 2] ,
+			['Nepal', 0] ,
+			['South Korea', 10] ,
+			['Maldives', 10] ,
+			['Iraq', 0] ,
+			['Cambodia', 0] ,
+			['Kuwait', 10] ,
+			['Japan', 2] ,
+			['North Korea', 6] 		
 		]);
 		
 		var chart = new google.visualization.GeoChart(document.getElementById('geochart-colors'));
@@ -99,12 +99,10 @@
 				var selectedRow = selection[0].row;
 				var selectedRegion = data.getFormattedValue(selection[0].row, 0);
 				
-				window.location.href = "<country>" + selectedRegion;
+				var link = "country:" + selectedRegion;
 				
-				var event = new Event(selectedRegion);
-				
-				document.addEventListener(selectedRegion, function(e){}, false);
-				document.dispatchEvent(event);
+				document.getElementById("country").href=link;
+				document.getElementById("country").click();
 			}
 		});
 		
@@ -115,5 +113,6 @@
   </head>
   <body>
 	<div id="geochart-colors" style="width: 500px; height: 480px;"></div>
+	<a id="country" href=""></a>
   </body>
 </html>

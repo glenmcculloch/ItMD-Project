@@ -22,9 +22,23 @@ function scene:create( event )
     
     local webView = native.newWebView( display.contentCenterX, display.contentCenterY, 500, 480 )
     webView:request( "geomapOceania.html", system.ResourceDirectory )
+	
+	webView:addEventListener( "urlRequest", webViewListener )
 end
- 
- 
+
+
+-- Function to listen to the webview and register any clicks on the map
+function webViewListener(event)
+	-- a country was clicked
+	if event.url and event.type == "other" then
+		local country = string.gsub(event.url, "%%20", " ")
+		country = split(country, ":")
+		
+		print(country[2])
+	end
+end
+
+
 -- show()
 function scene:show( event )
  

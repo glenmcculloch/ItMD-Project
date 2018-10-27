@@ -11,26 +11,20 @@ local scene = composer.newScene()
 function scene:create( event )
     local screenGroup = self.view
 	
-	local webView = native.newWebView( display.contentCenterX, display.contentCenterY, content_width, content_height )
+	local webView = native.newWebView( display.contentCenterX, display.contentCenterY, content_width - 100, content_height - 100 )
     webView:request( "Asia-map.html", system.DocumentsDirectory )
 	
 	webView:addEventListener( "urlRequest", webViewListener )
 end
 
--- listener for our webview
+-- Function to listen to the webview and register any clicks on the map
 function webViewListener(event)
-	if event.url then
-		print("EVENT URL FOUND")
-		if (event.type == "other") then
-			print("EVENT TYPE IS OTHER")
-			local urlString = url.unescape(event.url)
-			local start, ends = string.find(urlString, "<country>")
-			if start ~= nil then
-				local myString = string.sub(urlString, ends + 1)
-				
-				print(myString)
-			end
-		end
+	-- a country was clicked
+	if event.url and event.type == "other" then
+		local country = string.gsub(event.url, "%%20", " ")
+		country = split(country, ":")
+		
+		print(country[2])
 	end
 end
  

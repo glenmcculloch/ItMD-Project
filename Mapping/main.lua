@@ -104,6 +104,17 @@ local function saveCountryData(region, country)
 	file = nil
 end
 
+local function searchForCountry(country)
+	local found = false
+	for key,value in pairs(countries_alphabetical) do
+		if key == country then
+			found = true
+		end
+	end
+	
+
+end
+
 -- Function to set a country's characteristics value
 --  IDEA: have a drop-down menu with the values: No data, Present, Not present
 --         in the edit country details page
@@ -197,8 +208,6 @@ local function createHTMLFile(region)
 		for key, value in pairs(countries) do
 			if key == region then
 				for key, value in pairs(value) do
-					country = string.gsub(key, "% ", "-")
-					
 					line = string.format([[,
 			['%s', %i] ]], key, math.random(0,10))
 					
@@ -219,10 +228,11 @@ local function createHTMLFile(region)
 			if (selection.length == 1) {
 				var selectedRow = selection[0].row;
 				var selectedRegion = data.getFormattedValue(selection[0].row, 0);
-				var event = new Event(selectedRegion);
 				
-				document.addEventListener(selectedRegion, function(e){}, false);
-				document.dispatchEvent(event);
+				var link = "country:" + selectedRegion;
+				
+				document.getElementById("country").href=link;
+				document.getElementById("country").click();
 			}
 		});
 		
@@ -232,7 +242,8 @@ local function createHTMLFile(region)
 	</script>
   </head>
   <body>
-	<div id="geochart-colors" style="width: 500px; height: 480px;"></div>
+	<div id="geochart-colors" style="width: 500px; height: 380px;"></div>
+	<a id="country" href=""></a>
   </body>
 </html>]])
 		

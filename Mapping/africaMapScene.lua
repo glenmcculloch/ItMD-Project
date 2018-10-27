@@ -11,27 +11,23 @@ local scene = composer.newScene()
 function scene:create( event )
     local screenGroup = self.view
 	
-    -- Code here runs when the scene is first created but has not yet appeared on screen
-	local container = display.newGroup()
-
-	local top = 0
-	local left = 0
-	local bottom = content_height
-	local right = content_width
-
-	local content = display.newRect( left, top, right, bottom )
-	content:setFillColor(0.4, 0.4, 0.4)
-	content.anchorX = 0
-	content.anchorY = 0
-
-	container:insert(content)
-
 	local webView = native.newWebView( display.contentCenterX, display.contentCenterY, content_width, content_height )
     webView:request( "Africa-map.html", system.DocumentsDirectory )
 	
-	container:insert(webView)
+	webView:addEventListener( "urlRequest", webViewListener )
 end
- 
+
+-- Function to listen to the webview and register any clicks on the map
+function webViewListener(event)
+	-- a country was clicked
+	if event.url and event.type == "other" then
+		local country = string.gsub(event.url, "%%20", " ")
+		country = split(country, ":")
+		
+		print(country[2])
+	end
+end
+
  
 -- show()
 function scene:show( event )
