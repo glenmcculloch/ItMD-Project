@@ -28,7 +28,6 @@
 			},
 			backgroundColor: '#000000',
 			legend: 'none',
-			width: 568, 
 			keepAspectRatio: true
 		};
 		var data = google.visualization.arrayToDataTable([
@@ -46,9 +45,11 @@
 			var selection = chart.getSelection();
 			if (selection.length == 1) {
 				var selectedRow = selection[0].row;
-				var selectedRegion = data.getFormattedValue(selection[0].row, 0);
+				var selectedRegion = data.getFormattedValue(selection[0].row, 1);
 				
 				var link = "region:" + selectedRegion;
+				
+				alert(selectedRegion);
 				
 				document.getElementById("region").href=link;
 				document.getElementById("region").click();

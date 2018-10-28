@@ -4,6 +4,8 @@
 --
 -----------------------------------------------------------------------------------------
 local composer = require( "File Functions" )
+local widget = require( "widget" )
+local composer = require( "composer" )
 
 -- holds all country data for our program
 g_admins = {}
@@ -39,6 +41,13 @@ g_contentWidth = display.actualContentWidth
 
 g_currentRegion = nil
 
+g_displayMenu = display.newGroup()
+
+g_mapView_defaultCoordinates = {display.contentCenterX + 50, display.contentCenterY}
+g_mapView_hideCoordinates = {g_contentWidth + (g_contentWidth / 5), display.contentCenterY}
+g_mapView_hidden = false
+
+
 -----------------------------------------------------------------------------------------
 --
 -- Loading area
@@ -54,13 +63,31 @@ for key,value in pairs(g_countries) do
 	createHTMLFile(key)
 end
 
+--[[LOAD THE MAIN MAP]]--
+
+local mapView = native.newWebView( display.contentCenterX + 50, display.contentCenterY, g_contentWidth - 100, g_contentHeight)
+mapView:request( "World-map.html", system.ResourceDirectory )
+
+local function webViewListener(event)
+
+	-- a region was clicked
+	if event.url and event.type == "other" then
+		local data = string.gsub(event.url, "%%20", " ")
+		data = split(data, ":")
+		
+		print(data[2])
+	end
+end
+
+mapView:addEventListener( "urlRequest", webViewListener )
+
 
 -----------------------------------------------------------------------------------------
 --
 -- Buttons and UI
 --
 -----------------------------------------------------------------------------------------
-display.setDefault( "background", 0.2, 0.2, 0.2 )
+--[[display.setDefault( "background", 0.2, 0.2, 0.2 )
 
 local button_height = g_contentHeight / 12
 local button_width = g_contentWidth * 0.60
@@ -217,34 +244,12 @@ oceaniaButton.y = buttonPositions['Oceania']
 -- Change the button's label text
 oceaniaButton:setLabel( "Oceania" )
 
-
----------------------------------------------------------------------
-
--- Function to handle button events
-local function handleLoginButton( event )
-	
-    if ( "ended" == event.phase ) then
-        print("Login Button was pressed!")
-    end
-end
- 
--- Create the widget
-local loginButton = widget.newButton(
-    {
-        width = 50,
-        height = 50,
-        defaultFile = "user-icon.png",
-        overFile = "user-icon.png",
-        onEvent = handleLoginButton
-    }
-)
--- Center the button
-loginButton.x = g_contentWidth - 50
-loginButton.y = 0
+--]]
 
 
 ---------------------------------------------------------------------
-
+-- SEARCH BUTTON AND FIELD
+---------------------------------------------------------------------
 local searchField
 
 local function searchListener( event )
@@ -280,13 +285,79 @@ end
 -- Create the widget
 local searchButton = widget.newButton(
     {
-        width = 50,
-        height = 50,
+        width = 40,
+        height = 40,
         defaultFile = "search-icon.png",
         overFile = "search-icon.png",
         onEvent = handleSearchButton
     }
 )
 -- Center the button
-searchButton.x = 50
-searchButton.y = 0
+searchButton.x = 0
+searchButton.y = 30
+
+g_displayMenu:insert(searchButton)
+
+
+---------------------------------------------------------------------
+-- LOGIN BUTTON
+---------------------------------------------------------------------
+-- Function to handle button events
+local function handleLoginButton( event )
+	
+    if ( "ended" == event.phase ) then
+        print("Login Button was pressed!")
+    end
+end
+
+-- Create the widget
+local loginButton = widget.newButton(
+    {
+        width = 40,
+        height = 40,
+        defaultFile = "user-icon.png",
+        overFile = "user-icon.png",
+        onEvent = handleLoginButton
+    }
+)
+-- Center the button
+loginButton.x = 0
+loginButton.y = 80
+
+g_displayMenu:insert(loginButton)
+
+
+---------------------------------------------------------------------
+-- EDIT BUTTON
+---------------------------------------------------------------------
+-- Function to handle button events
+local function handleEditButton( event )
+	
+    if ( "ended" == event.phase ) then
+        print("Edit Button was pressed!")
+		
+		if g_mapView_hidden == false then
+			g_mapView_hidden = true
+			transition.moveTo(mapView, { x=g_mapView_hideCoordinates[1], y=g_mapView_hideCoordinates[2], time=400 })
+		else
+			g_mapView_hidden = false
+			transition.moveTo(mapView, { x=g_mapView_defaultCoordinates[1], y=g_mapView_defaultCoordinates[2], time=400 })
+		end
+	end
+end
+
+-- Create the widget
+local editButton = widget.newButton(
+    {
+        width = 40,
+        height = 40,
+        defaultFile = "edit-icon.png",
+        overFile = "edit-icon.png",
+        onEvent = handleEditButton
+    }
+)
+-- Center the button
+editButton.x = 0
+editButton.y = 130
+
+g_displayMenu:insert(editButton)
