@@ -5,13 +5,13 @@ Benin
 Botswana
 Burkina Faso
 Burundi
-Cabo Verde
+Cape Verde
 Cameroon
 Central African Republic
+Ceuta
 Chad
 Comoros
-Democratic Republic of the Congo
-Republic of the Congo
+Congo, the Democratic Republic of the
 Ivory Coast
 Djibouti
 Egypt
@@ -38,6 +38,7 @@ Mozambique
 Namibia
 Niger
 Nigeria
+Republic of the Congo
 Rwanda
 Sao Tome and Principe
 Senegal
@@ -47,10 +48,12 @@ Somalia
 South Africa
 South Sudan
 Sudan
+Swaziland
 Tanzania
 Togo
 Tunisia
 Uganda
+Western Sahara
 Zambia
 Zimbabwe
 
@@ -87,7 +90,7 @@ Saint Lucia
 Saint Vincent and the Grenadines
 Suriname
 Trinidad and Tobago
-United States of America
+United States
 Uruguay
 Venezuala
 
@@ -204,6 +207,7 @@ Kiribati
 Marshall Islands
 Micronesia
 Nauru
+New Caledonia
 New Zealand
 Palau
 Papua New Guinea

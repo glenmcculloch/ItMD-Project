@@ -3,9 +3,12 @@
 -- The main screen for our program!
 --
 -----------------------------------------------------------------------------------------
+local composer = require( "File Functions" )
 
 -- holds all country data for our program
+admins = {}
 countries = {}
+country_codes = {}
 
 region_id = {
 	['Africa'] = '002', 
@@ -15,317 +18,35 @@ region_id = {
 	['Oceania'] = '009'
 }
 
--- all country characteristics
+country_setting = {
+	"...", 	-- 0
+	"No", 	-- 1
+	"Yes"	-- 2
+}
+
+-- all country characteristics with default values
 country_characteristic = {
-	['Torture'] = nil, 
-	['Death Penalty'] = nil, 
-	['Conflict'] = nil, 
-	['State of Oppression'] = nil, 
-	['Legal Torture'] = nil
+	['Torture'] = 0, 
+	['Death Penalty'] = 0, 
+	['Conflict'] = 0, 
+	['State of Oppression'] = 0, 
+	['Legal Torture'] = 0, 
+	['Additional Information'] = "..."
 }
 
 content_height = display.actualContentHeight
 content_width = display.actualContentWidth
 
------------------------------------------------------------------------------------------
---
--- File-Related functions
---
------------------------------------------------------------------------------------------
-
--- Function to split a string given a token
-function split(s, token)
-    result = {};
-    for match in (s..token):gmatch("(.-)"..token) do
-        table.insert(result, match);
-    end
-    return result;
-end
-
--- Function to load specific country settings from file
---  (if not found it defaults to nil for each characteristic)
-local function loadCountryData(region, country)
-	local path = system.pathForFile(string.format("%s.data", country), system.DocumentsDirectory)
-	local file, errorString = io.open(path, "r")
-	
-	local result = {}
-
-	if file then
-		local s
-		for line in io.lines(path) do
-			if line:len() ~= 0 then
-				-- split the line (format characteristic=value)
-				s = split(line, "=")
-				
-				if s[1] == "Additional Information" then
-					result[s[1]] = s[2]
-				elseif s[2] == "nil" then
-					result[s[1]] = nil
-				elseif s[2] == "true" then
-					result[s[1]] = true
-				elseif s[2] == "false" then
-					result[s[1]] = false
-				end
-			end
-		end
-		io.close(file)
-	else
-		result = country_characteristic
-	end
-	
-	file = nil
-	return result
-end
-
--- Function to load countries from file (for searches and saved data)
-local function saveCountryData(region, country)
-	local path = system.pathForFile(string.format("%s.data", country), system.DocumentsDirectory)
-	local file, errorString = io.open(path, "w")
-
-	if not file then
-		print("File error: " .. errorString)
-	else
-		local line
-		for key,value in pairs(countries[region][country]) do
-			if key == "Additional Information" then
-				file:write(string.format("Additional Information=%s", value))
-			elseif value == nil then
-				file:write(string.format("%s=nil", key))
-			elseif value == true then
-				file:write(string.format("%s=true", key))
-			elseif value == false then
-				file:write(string.format("%s=false", key))
-			end
-		end
-		
-		file:close()
-	end
-	
-	file = nil
-end
-
-local function searchForCountry(country)
-	local found = false
-	for key,value in pairs(countries_alphabetical) do
-		if key == country then
-			found = true
-		end
-	end
-	
-
-end
-
--- Function to set a country's characteristics value
---  IDEA: have a drop-down menu with the values: No data, Present, Not present
---         in the edit country details page
-local function setCountryData(region, country, characteristic)
-	-- TO DO: get values from edit-country form and set the characteristics
-	
-	--[[
-	countries[region][country][characteristic] = torture_field_value
-	countries[region][country][characteristic] = deathpenalty_field_value
-	...
-	saveCountryData(region, country)
-	]]--
-end
-
--- This function is used to determine a country's rating depending on its characteristics
---  WE NEED TO GET CHARACTERISTIC VALUES FROM THE CLIENT TO COMPLETE THIS
---   RIGHT NOW RATINGS ARE DETERMINED RANDOMLY ON APPLICATION STARTUP
-local function getCountryRating(region, country)
-	-- default rating is 0 (no data)
-	local rating = 0
-	
-	--[[CODE TO ADD (EXAMPLE)
-	
-	if torture_present then
-		rating = ???
-	elseif incarceration_present then
-		rating = ???
-	end
-	
-	return rating
-	]]--
-end
-
--- Function that creates an html page for our webview. This will be saved in documents directory
-local function createHTMLFile(region)
-	local path = system.pathForFile(string.format("%s-map.html", region), system.DocumentsDirectory)
-	local file, errorString = io.open(path, "w")
-
-	if not file then
-		print("File error: " .. errorString)
-	else
-		local line
-		
-		-- initial startup line
-		line = string.format([[
-<html>
-  <head>
-	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-	
-	<script type="text/javascript">
-	  google.charts.load('current', {
-		'packages':['geochart'],
-		// Note: you will need to get a mapsApiKey for your project.
-		// See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings
-		'mapsApiKey': 'AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY'
-	  });
-	google.charts.setOnLoadCallback(drawVisualisation);
-	
-	function drawVisualisation() {
-		var options = {
-			region: '%s',
-			colorAxis: {
-			colors: [
-				'#FFFFFF', // 0
-				'#00853F', // 1
-				'#3F9B39', // 2
-				'#7FB234', // 3
-				'#BFC82E', // 4
-				'#BFC82E', // 5
-				'#F8AE27', // 6
-				'#F8AE27', // 7
-				'#F17D26', // 8
-				'#EA4C24', // 9
-				'#E31B23', // 10
-				], 
-				values: [0,1,2,3,4,5,6,7,8,9,10]
-			},
-			backgroundColor: '#81d4fa',
-			displayMode: 'regions',
-			datalessRegionColor: '#0000FF',
-			defaultColor: '#f5f5f5',
-		};
-		
-		var data = google.visualization.arrayToDataTable([
-			['Country', 'Rating'] ]], region_id[region])
-		
-		file:write(line)
-		
-		-- start looping through all countries within that region
-		for key, value in pairs(countries) do
-			if key == region then
-				for key, value in pairs(value) do
-					line = string.format([[,
-			['%s', %i] ]], key, math.random(0,10))
-					
-					file:write(line)
-				end
-			end
-		end
-		
-		-- end of file stuff
-		line = string.format([[
-		
-		]);
-		
-		var chart = new google.visualization.GeoChart(document.getElementById('geochart-colors'));
-		
-		google.visualization.events.addListener(chart, 'select', function(e) {
-			var selection = chart.getSelection();
-			if (selection.length == 1) {
-				var selectedRow = selection[0].row;
-				var selectedRegion = data.getFormattedValue(selection[0].row, 0);
-				
-				var link = "country:" + selectedRegion;
-				
-				document.getElementById("country").href=link;
-				document.getElementById("country").click();
-			}
-		});
-		
-		chart.draw(data, options);
-	}
-	
-	</script>
-  </head>
-  <body>
-	<div id="geochart-colors" style="width: 500px; height: 380px;"></div>
-	<a id="country" href=""></a>
-  </body>
-</html>]])
-		
-		file:write(line)
-		file:close()
-	end
-	
-	file = nil
-end
-
--- Function that saves our region data to persistent storage
---  (the html file will then load this to colour the map)
-local function saveCountryData(region)
-	local path = system.pathForFile(string.format("%s-data.xml", region), system.DocumentsDirectory)
-	local file, errorString = io.open(path, "w")
-
-	if not file then
-		print("File error: " .. errorString)
-	else
-		local line, country
-		
-		file:write(string.format("<%s>\n", region))
-		
-		-- iterate through all countries within the given region
-		for key, value in pairs(countries) do
-			if key == region then
-				for key, value in pairs(value) do
-					country = string.gsub(key, "% ", "-")
-					
-					file:write(string.format("\t<country>\n\t\t<name>%s</name>\n\t\t<rating>%i</rating>\n\t</country>\n", country, math.random(0, 10)))
-				end
-			end
-		end
-		
-		file:write(string.format("</%s>", region))
-		file:close()
-	end
-	
-	file = nil
-end
-
--- Function to load countries from file (for searches and saved data)
-local function loadCountries()
-	local path = system.pathForFile("countryList.txt", system.ResourceDirectory)
-	local file, errorString = io.open(path, "r")
-
-	if not file then
-		print("File error: " .. errorString)
-	else
-		local region
-		-- iterate through each line in the file
-		for line in io.lines(path) do
-			-- length is 0, ignore this line
-			if line:len() ~= 0 then
-				-- line includes a region
-				if string.find(line, "%[") ~= nil then
-					-- remove [ and ]
-					line = string.gsub(line, "%[", '')
-					line = string.gsub(line, "%]", '')
-					
-					region = line
-					
-					-- initialise region table
-					countries[region] = {}
-				elseif region ~= nil then
-					countries[region][line] = loadCountryData(region, line)
-				end
-			end
-		end
-		io.close( file )
-	end
-	
-	file = nil
-end
+current_region = nil
 
 -----------------------------------------------------------------------------------------
 --
 -- Loading area
 --
 -----------------------------------------------------------------------------------------
-
+loadAdmins()
 loadCountries()
+loadCountryCodes()
 
 -- Create all map files!
 for key,value in pairs(countries) do
@@ -336,16 +57,47 @@ end
 
 -----------------------------------------------------------------------------------------
 --
--- Buttons and UI (Main code)
+-- Buttons and UI
 --
 -----------------------------------------------------------------------------------------
+display.setDefault( "background", 0, 0, 0 )
 
-display.setDefault( "background", 0, 9, 8 )
+local button_height = content_height / 12
+local button_width = content_width * 0.60
 
+local buttonPositions = {}
+
+local buttonOptions = {
+	label = "button",
+	emboss = false,
+	-- Properties for a rounded rectangle button
+	shape = "roundedRect",
+	width = button_width,
+	height = button_height,
+	cornerRadius = 5,
+	fillColor = { default={1,1,1,0.5}, over={1,1,1,0.5} },
+	strokeColor = { default={1,1,1,0.9}, over={1,1,1,0.9} },
+	strokeWidth = 4
+}
+
+local y_coord = display.contentCenterY - content_height / 10
+
+-- iterate through the buttons and get their x coordinate
+for key,value in pairs(countries) do
+	buttonPositions[key] = y_coord
+	
+	y_coord = y_coord + button_height + 20
+end
+
+
+-----------------------------------------------------------------------------------------
+--
+-- Region Buttons
+--
+-----------------------------------------------------------------------------------------
 local widget = require( "widget" )
 local composer = require( "composer" )
 
- 
 -- Function to handle button events
 local function handleAsiaButton( event )
  
@@ -354,30 +106,17 @@ local function handleAsiaButton( event )
         composer.gotoScene("asiaMapScene")
     end
 end
- 
+
 -- Create the widget
-local Asiabutton = widget.newButton(
-    {
-        label = "button",
-        onEvent = handleAsiaButton,
-        emboss = false,
-        -- Properties for a rounded rectangle button
-        shape = "roundedRect",
-        width = 200,
-        height = 40,
-        cornerRadius = 2,
-        fillColor = { default={1,0,0,1}, over={1,0.1,0.7,0.4} },
-        strokeColor = { default={1,0.4,0,1}, over={0.8,0.8,1,1} },
-        strokeWidth = 4
-    }
-)
+buttonOptions.onEvent = handleAsiaButton
+local asiaButton = widget.newButton(buttonOptions)
  
 -- Center the button
-Asiabutton.x = display.contentCenterX 
-Asiabutton.y = display.contentCenterY - 150
+asiaButton.x = display.contentCenterX
+asiaButton.y = buttonPositions['Asia']
  
 -- Change the button's label text
-Asiabutton:setLabel( "Asia" )
+asiaButton:setLabel( "Asia" )
 
 
 -------------------------------------------------------------------------
@@ -392,28 +131,15 @@ local function handleAfricaButton( event )
 end
  
 -- Create the widget
-local Africabutton = widget.newButton(
-    {
-        label = "button",
-        onEvent = handleAfricaButton,
-        emboss = false,
-        -- Properties for a rounded rectangle button
-        shape = "roundedRect",
-        width = 200,
-        height = 40,
-        cornerRadius = 2,
-        fillColor = { default={1,0,0,1}, over={1,0.1,0.7,0.4} },
-        strokeColor = { default={1,0.4,0,1}, over={0.8,0.8,1,1} },
-        strokeWidth = 4
-    }
-)
- 
+buttonOptions.onEvent = handleAfricaButton
+local africaButton = widget.newButton(buttonOptions)
+
 -- Center the button
-Africabutton.x = display.contentCenterX 
-Africabutton.y = display.contentCenterY - 50
+africaButton.x = display.contentCenterX
+africaButton.y = buttonPositions['Africa']
  
 -- Change the button's label text
-Africabutton:setLabel( "Africa" )
+africaButton:setLabel( "Africa" )
 
 
 -----------------------------------------------------------
@@ -430,28 +156,15 @@ local function handleEuropeButton( event )
 end
  
 -- Create the widget
-local Europebutton = widget.newButton(
-    {
-        label = "button",
-        onEvent = handleEuropeButton,
-        emboss = false,
-        -- Properties for a rounded rectangle button
-        shape = "roundedRect",
-        width = 200,
-        height = 40,
-        cornerRadius = 2,
-        fillColor = { default={1,0,0,1}, over={1,0.1,0.7,0.4} },
-        strokeColor = { default={1,0.4,0,1}, over={0.8,0.8,1,1} },
-        strokeWidth = 4
-    }
-)
+buttonOptions.onEvent = handleEuropeButton
+local europeButton = widget.newButton(buttonOptions)
  
 -- Center the button
-Europebutton.x = display.contentCenterX 
-Europebutton.y = display.contentCenterY - -40
+europeButton.x = display.contentCenterX
+europeButton.y = buttonPositions['Europe']
  
 -- Change the button's label text
-Europebutton:setLabel( "Europe" )
+europeButton:setLabel( "Europe" )
 
 
 ----------------------------------------------------------------
@@ -466,28 +179,15 @@ local function handleAmericasButton( event )
 end
  
 -- Create the widget
-local Americasbutton = widget.newButton(
-    {
-        label = "button",
-        onEvent = handleAmericasButton,
-        emboss = false,
-        -- Properties for a rounded rectangle button
-        shape = "roundedRect",
-        width = 200,
-        height = 40,
-        cornerRadius = 2,
-        fillColor = { default={1,0,0,1}, over={1,0.1,0.7,0.4} },
-        strokeColor = { default={1,0.4,0,1}, over={0.8,0.8,1,1} },
-        strokeWidth = 4
-    }
-)
- 
+buttonOptions.onEvent = handleAmericasButton
+local americasButton = widget.newButton(buttonOptions)
+
 -- Center the button
-Americasbutton.x = display.contentCenterX 
-Americasbutton.y = display.contentCenterY - -120
+americasButton.x = display.contentCenterX
+americasButton.y = buttonPositions['Americas']
  
 -- Change the button's label text
-Americasbutton:setLabel( "Americas" )
+americasButton:setLabel( "Americas" )
 
 
 ---------------------------------------------------------------------
@@ -502,25 +202,12 @@ local function handleOceaniaButton( event )
 end
  
 -- Create the widget
-local Oceaniabutton = widget.newButton(
-    {
-        label = "button",
-        onEvent = handleOceaniaButton,
-        emboss = false,
-        -- Properties for a rounded rectangle button
-        shape = "roundedRect",
-        width = 200,
-        height = 40,
-        cornerRadius = 2,
-        fillColor = { default={1,0,0,1}, over={1,0.1,0.7,0.4} },
-        strokeColor = { default={1,0.4,0,1}, over={0.8,0.8,1,1} },
-        strokeWidth = 4
-    }
-)
+buttonOptions.onEvent = handleOceaniaButton
+local oceaniaButton = widget.newButton(buttonOptions)
  
 -- Center the button
-Oceaniabutton.x = display.contentCenterX 
-Oceaniabutton.y = display.contentCenterY - -200
+oceaniaButton.x = display.contentCenterX
+oceaniaButton.y = buttonPositions['Oceania']
  
 -- Change the button's label text
-Oceaniabutton:setLabel( "Oceania" )
+oceaniaButton:setLabel( "Oceania" )

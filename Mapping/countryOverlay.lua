@@ -1,55 +1,38 @@
------------------------------------------------------------------------------------------
---
--- Asia Map scene
---
------------------------------------------------------------------------------------------
 local composer = require( "composer" )
+ 
 local scene = composer.newScene()
-
-local container = display.newGroup()
-
 
 -- -----------------------------------------------------------------------------------
 -- Scene event functions
 -- -----------------------------------------------------------------------------------
-
+ 
 -- create()
 function scene:create( event )
-	local background = display.newRect( display.contentCenterX, display.contentCenterY, content_width, content_height )
-	background.fill = {0,0,0}
-	background.stroke = {1, 0, 0.5}
-	
-	container:insert(background)
-	
-    local screenGroup = self.view
-	
-	local mapView = native.newWebView( display.contentCenterX, display.contentCenterY, content_width, content_height )
-    mapView:request( "Asia-map.html", system.DocumentsDirectory )
-	
-	mapView:addEventListener( "urlRequest", webViewListener )
-end
 
--- Function to listen to the webview and register any clicks on the map
-function webViewListener(event)
-	-- a country was clicked
-	if event.url and event.type == "other" then
-		local country = string.gsub(event.url, "%%20", " ")
-		country = split(country, ":")
+    local sceneGroup = self.view
+	local params = event.params
+    
+	local container = display.newRect( display.contentCenterX, display.contentCenterY, content_width - 50, content_height - 50 )
+	container.fill = { 1, 1, 1 }
+	
+	sceneGroup:insert(container)
+	
+	--print(params.country_data)
+	
+	local iter = 0
+	
+	-- iterate through characteristics
+	for key,value in pairs(params.country_data) do
 		
-		print(country[2])
+		local toString = string.format("%s - %s", key, value)
+		local text = display.newText(sceneGroup, toString, 100, 100 + iter, native.systemFont, 16 )
+		text:setFillColor( 1, 0, 0 )
+		sceneGroup:insert(text)
 		
-		local options = {
-			isModal = true, 
-			effect = "fade", 
-			time = 400, 
-			params = {
-				country_data = countries['Asia'][country[2]]
-			}
-		}
-		
-		composer.showOverlay( "countryOverlay", options )
+		iter = iter + 20
 	end
 end
+ 
  
 -- show()
 function scene:show( event )
@@ -102,10 +85,3 @@ scene:addEventListener( "destroy", scene )
 -- -----------------------------------------------------------------------------------
  
 return scene
-
-
-
-
-
-
-

@@ -1,12 +1,10 @@
 -----------------------------------------------------------------------------------------
 --
--- Asia Map scene
+-- Dynamic map scene
 --
 -----------------------------------------------------------------------------------------
 local composer = require( "composer" )
 local scene = composer.newScene()
-
-local container = display.newGroup()
 
 
 -- -----------------------------------------------------------------------------------
@@ -15,18 +13,12 @@ local container = display.newGroup()
 
 -- create()
 function scene:create( event )
-	local background = display.newRect( display.contentCenterX, display.contentCenterY, content_width, content_height )
-	background.fill = {0,0,0}
-	background.stroke = {1, 0, 0.5}
-	
-	container:insert(background)
-	
     local screenGroup = self.view
 	
-	local mapView = native.newWebView( display.contentCenterX, display.contentCenterY, content_width, content_height )
-    mapView:request( "Asia-map.html", system.DocumentsDirectory )
+	local webView = native.newWebView( display.contentCenterX, display.contentCenterY, content_width - 100, content_height - 100 )
+    webView:request( "Asia-map.html", system.DocumentsDirectory )
 	
-	mapView:addEventListener( "urlRequest", webViewListener )
+	webView:addEventListener( "urlRequest", webViewListener )
 end
 
 -- Function to listen to the webview and register any clicks on the map
