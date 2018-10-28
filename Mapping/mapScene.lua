@@ -1,10 +1,12 @@
 -----------------------------------------------------------------------------------------
 --
--- Dynamic map scene
+-- Dynamic Map scene
 --
 -----------------------------------------------------------------------------------------
 local composer = require( "composer" )
 local scene = composer.newScene()
+
+local container = display.newGroup()
 
 
 -- -----------------------------------------------------------------------------------
@@ -13,33 +15,41 @@ local scene = composer.newScene()
 
 -- create()
 function scene:create( event )
+
+	local background = display.newRect( display.contentCenterX, display.contentCenterY, g_contentWidth, g_contentHeight )
+	background.fill = {0,0,0}
+	background.stroke = {1, 0, 0.5}
+	
+	container:insert(background)
+	
     local screenGroup = self.view
 	
-	local webView = native.newWebView( display.contentCenterX, display.contentCenterY, content_width - 100, content_height - 100 )
-    webView:request( "Asia-map.html", system.DocumentsDirectory )
+	local mapView = native.newWebView( display.contentCenterX, display.contentCenterY, g_contentWidth, g_contentHeight )
+    mapView:request( string.format("%s-map.html", g_currentRegion), system.DocumentsDirectory )
 	
-	webView:addEventListener( "urlRequest", webViewListener )
+	mapView:addEventListener( "urlRequest", webViewListener )
 end
 
 -- Function to listen to the webview and register any clicks on the map
 function webViewListener(event)
+
 	-- a country was clicked
 	if event.url and event.type == "other" then
-		local country = string.gsub(event.url, "%%20", " ")
-		country = split(country, ":")
+		local data = string.gsub(event.url, "%%20", " ")
+		data = split(data, ":")
 		
-		print(country[2])
+		print(data[2])
 		
 		local options = {
 			isModal = true, 
 			effect = "fade", 
 			time = 400, 
 			params = {
-				country_data = countries['Asia'][country[2]]
+				country_data = g_countries[g_currentRegion][data[2]]
 			}
 		}
 		
-		composer.showOverlay( "countryOverlay", options )
+		--composer.showOverlay( "countryOverlay", options )
 	end
 end
  
@@ -94,10 +104,3 @@ scene:addEventListener( "destroy", scene )
 -- -----------------------------------------------------------------------------------
  
 return scene
-
-
-
-
-
-
-

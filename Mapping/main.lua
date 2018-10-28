@@ -6,11 +6,11 @@
 local composer = require( "File Functions" )
 
 -- holds all country data for our program
-admins = {}
-countries = {}
-country_codes = {}
+g_admins = {}
+g_countries = {}
+g_countryCodes = {}
 
-region_id = {
+g_regionId = {
 	['Africa'] = '002', 
 	['Europe'] = '150', 
 	['Americas'] = '019', 
@@ -18,14 +18,14 @@ region_id = {
 	['Oceania'] = '009'
 }
 
-country_setting = {
+g_countrySetting = {
 	"...", 	-- 0
 	"No", 	-- 1
 	"Yes"	-- 2
 }
 
 -- all country characteristics with default values
-country_characteristic = {
+g_countryCharacteristic = {
 	['Torture'] = 0, 
 	['Death Penalty'] = 0, 
 	['Conflict'] = 0, 
@@ -34,10 +34,10 @@ country_characteristic = {
 	['Additional Information'] = "..."
 }
 
-content_height = display.actualContentHeight
-content_width = display.actualContentWidth
+g_contentHeight = display.actualContentHeight
+g_contentWidth = display.actualContentWidth
 
-current_region = nil
+g_currentRegion = nil
 
 -----------------------------------------------------------------------------------------
 --
@@ -49,7 +49,7 @@ loadCountries()
 loadCountryCodes()
 
 -- Create all map files!
-for key,value in pairs(countries) do
+for key,value in pairs(g_countries) do
 	print(string.format("Creating region map (%s)", key))
 	createHTMLFile(key)
 end
@@ -60,10 +60,10 @@ end
 -- Buttons and UI
 --
 -----------------------------------------------------------------------------------------
-display.setDefault( "background", 0, 0, 0 )
+display.setDefault( "background", 0.2, 0.2, 0.2 )
 
-local button_height = content_height / 12
-local button_width = content_width * 0.60
+local button_height = g_contentHeight / 12
+local button_width = g_contentWidth * 0.60
 
 local buttonPositions = {}
 
@@ -80,10 +80,10 @@ local buttonOptions = {
 	strokeWidth = 4
 }
 
-local y_coord = display.contentCenterY - content_height / 10
+local y_coord = display.contentCenterY - g_contentHeight / 10
 
 -- iterate through the buttons and get their x coordinate
-for key,value in pairs(countries) do
+for key,value in pairs(g_countries) do
 	buttonPositions[key] = y_coord
 	
 	y_coord = y_coord + button_height + 20
@@ -100,10 +100,11 @@ local composer = require( "composer" )
 
 -- Function to handle button events
 local function handleAsiaButton( event )
+	g_currentRegion = 'Asia'
  
     if ( "ended" == event.phase ) then
         print( "Asia Button was pressed and released" )
-        composer.gotoScene("asiaMapScene")
+        composer.gotoScene("mapScene")
     end
 end
 
@@ -123,10 +124,11 @@ asiaButton:setLabel( "Asia" )
 
 -- Function to handle button events
 local function handleAfricaButton( event )
+	g_currentRegion = 'Africa'
  
     if ( "ended" == event.phase ) then
         print( "Button was pressed and released" )
-        composer.gotoScene("africaMapScene")
+        composer.gotoScene("mapScene")
     end
 end
  
@@ -146,10 +148,11 @@ africaButton:setLabel( "Africa" )
 
 -- Function to handle button events
 local function handleEuropeButton( event )
+	g_currentRegion = 'Europe'
  
     if ( "ended" == event.phase ) then
         print( "Europe Button was pressed and released" )
-        composer.gotoScene("europeMapScene")
+        composer.gotoScene("mapScene")
 
 
     end
@@ -171,10 +174,11 @@ europeButton:setLabel( "Europe" )
 
 -- Function to handle button events
 local function handleAmericasButton( event )
+	g_currentRegion = 'Americas'
  
     if ( "ended" == event.phase ) then
         print( "Americas Button was pressed and released" )
-        composer.gotoScene("americasMapScene")
+        composer.gotoScene("mapScene")
     end
 end
  
@@ -194,10 +198,11 @@ americasButton:setLabel( "Americas" )
 
 -- Function to handle button events
 local function handleOceaniaButton( event )
+	g_currentRegion = 'Oceania'
  
     if ( "ended" == event.phase ) then
         print( " Oceania Button was pressed and released" )
-        composer.gotoScene("oceaniaMapScene")
+        composer.gotoScene("mapScene")
     end
 end
  
@@ -211,3 +216,77 @@ oceaniaButton.y = buttonPositions['Oceania']
  
 -- Change the button's label text
 oceaniaButton:setLabel( "Oceania" )
+
+
+---------------------------------------------------------------------
+
+-- Function to handle button events
+local function handleLoginButton( event )
+	
+    if ( "ended" == event.phase ) then
+        print("Login Button was pressed!")
+    end
+end
+ 
+-- Create the widget
+local loginButton = widget.newButton(
+    {
+        width = 50,
+        height = 50,
+        defaultFile = "user-icon.png",
+        overFile = "user-icon.png",
+        onEvent = handleLoginButton
+    }
+)
+-- Center the button
+loginButton.x = g_contentWidth - 50
+loginButton.y = 0
+
+
+---------------------------------------------------------------------
+
+local searchField
+
+local function searchListener( event )
+	
+    if ( event.phase == "began" ) then
+        -- User begins editing "defaultField"
+	
+    elseif ( event.phase == "ended" or event.phase == "submitted" ) then
+        -- Output resulting text from "defaultField"
+        print( event.target.text )
+		
+		local result = searchForCountry(event.target.text, nil)
+		if found ~= nil then
+			g_currentRegion = result
+			composer.gotoScene("mapScene")
+		else
+			print("Country was not found...")
+		end
+		
+		searchField:removeSelf()
+    end
+end
+
+-- Function to handle button events
+local function handleSearchButton( event )
+	
+    if ( "ended" == event.phase ) then
+		searchField = native.newTextField( display.contentCenterX, 0, g_contentWidth - 100, 50 )
+		searchField:addEventListener( "userInput", searchListener )
+    end
+end
+ 
+-- Create the widget
+local searchButton = widget.newButton(
+    {
+        width = 50,
+        height = 50,
+        defaultFile = "search-icon.png",
+        overFile = "search-icon.png",
+        onEvent = handleSearchButton
+    }
+)
+-- Center the button
+searchButton.x = 50
+searchButton.y = 0

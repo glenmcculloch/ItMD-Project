@@ -14,81 +14,30 @@
 	
 	function drawVisualisation() {
 		var options = {
-			region: '142',
+			region: 'world',
+			resolution: 'continents', 
 			colorAxis: {
 			colors: [
-				'#FFFFFF', // 0
-				'#00853F', // 1
-				'#3F9B39', // 2
-				'#7FB234', // 3
-				'#BFC82E', // 4
-				'#BFC82E', // 5
-				'#F8AE27', // 6
-				'#F8AE27', // 7
-				'#F17D26', // 8
-				'#EA4C24', // 9
-				'#E31B23', // 10
+				'red', // 1
+				'orange', // 2
+				'cyan', // 3
+				'purple', // 4
+				'yellow', // 5
 				], 
-				values: [0,1,2,3,4,5,6,7,8,9,10]
+				values: [1,2,3,4,5]
 			},
-			backgroundColor: '#81d4fa',
-			displayMode: 'regions',
-			datalessRegionColor: '#0000FF',
-			defaultColor: '#f5f5f5',
+			backgroundColor: '#000000',
+			legend: 'none',
+			width: 568, 
+			keepAspectRatio: true
 		};
-		
 		var data = google.visualization.arrayToDataTable([
-			['Country', 'Rating'] ,
-			['Mongolia', 6] ,
-			['Laos', 3] ,
-			['Armenia', 2] ,
-			['Kazakhstan', 7] ,
-			['Israel', 0] ,
-			['Bhutan', 1] ,
-			['Afghanistan', 2] ,
-			['Bangladesh', 1] ,
-			['Iran', 7] ,
-			['Yemen', 10] ,
-			['Vietnam', 4] ,
-			['Uzbekistan', 2] ,
-			['Singapore', 8] ,
-			['United Arab Emirates', 1] ,
-			['Turkmenistan', 8] ,
-			['Turkey', 7] ,
-			['Timor-Leste', 7] ,
-			['Thailand', 1] ,
-			['Myanmar', 9] ,
-			['Taiwan', 7] ,
-			['Syria', 2] ,
-			['Saudi Arabia', 4] ,
-			['Sri Lanka', 6] ,
-			['Russia', 8] ,
-			['Tajikistan', 5] ,
-			['Qatar', 7] ,
-			['Philippines', 3] ,
-			['Lebanon', 6] ,
-			['Azerbaijan', 10] ,
-			['Jordan', 9] ,
-			['Palestine', 9] ,
-			['Indonesia', 1] ,
-			['China', 6] ,
-			['Bahrain', 5] ,
-			['Malaysia', 5] ,
-			['Pakistan', 10] ,
-			['Cyprus', 3] ,
-			['Brunei', 1] ,
-			['Georgia', 10] ,
-			['Kyrgyzstan', 4] ,
-			['Oman', 7] ,
-			['India', 2] ,
-			['Nepal', 0] ,
-			['South Korea', 10] ,
-			['Maldives', 10] ,
-			['Iraq', 0] ,
-			['Cambodia', 0] ,
-			['Kuwait', 10] ,
-			['Japan', 2] ,
-			['North Korea', 6] 		
+			['Region code', 'Continent', 'Value'] ,
+			['002', 'Africa', 1] ,
+			['150', 'Europe', 2] ,
+			['019', 'Americas', 3] ,
+			['142', 'Asia', 4] ,
+			['009', 'Oceania', 5]
 		]);
 		
 		var chart = new google.visualization.GeoChart(document.getElementById('geochart-colors'));
@@ -99,10 +48,10 @@
 				var selectedRow = selection[0].row;
 				var selectedRegion = data.getFormattedValue(selection[0].row, 0);
 				
-				var link = "country:" + selectedRegion;
+				var link = "region:" + selectedRegion;
 				
-				document.getElementById("country").href=link;
-				document.getElementById("country").click();
+				document.getElementById("region").href=link;
+				document.getElementById("region").click();
 			}
 		});
 		
@@ -111,8 +60,8 @@
 	
 	</script>
   </head>
-  <body>
-	<div id="geochart-colors" style="width: 500px; height: 480px;"></div>
-	<a id="country" href=""></a>
+  <body style="background:black">
+	<div id="geochart-colors"></div>
+	<a id="region" href=""></a>
   </body>
 </html>

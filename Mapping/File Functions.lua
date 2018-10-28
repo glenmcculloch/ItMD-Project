@@ -49,7 +49,7 @@ function loadCountryData(region, country)
 		end
 		io.close(file)
 	else
-		result = country_characteristic
+		result = g_countryCharacteristic
 	end
 	
 	file = nil
@@ -65,7 +65,7 @@ function saveCountryData(region, country)
 		print("File error: " .. errorString)
 	else
 		local line
-		for key,value in pairs(countries[region][country]) do
+		for key,value in pairs(g_countries[region][country]) do
 			if key == "Additional Information" then
 				file:write(string.format("Additional Information=%s", value))
 			elseif value == nil then
@@ -83,11 +83,28 @@ function saveCountryData(region, country)
 	file = nil
 end
 
+-- Function that searches for a specific country and returns either nil or a table
 function searchForCountry(country, region)
-	local found = false
-	for key,value in pairs(countries[region]) do
-		if key == country then
-			found = true
+	local found
+	
+	-- search through specific region
+	if region ~= nil then
+		-- search through all regions
+		for key,value in pairs(g_countries[region]) do
+			if string.lower(key) == string.lower(country) then
+				found = region
+				break
+			end
+		end
+	-- search through all regions
+	else
+		for key,value in pairs(g_countries) do
+			for key_2,value_2 in pairs(value) do
+				if string.lower(key) == string.lower(country) then
+					found = key
+					break
+				end
+			end
 		end
 	end
 	
@@ -177,17 +194,17 @@ function createHTMLFile(region)
 			datalessRegionColor: '#0000FF',
 			defaultColor: '#000000',
 			legend: 'none',
-			width: 1000,
+			width: %d, 
 			keepAspectRatio: true
 		};
 		
 		var data = google.visualization.arrayToDataTable([
-			['Country', 'Rating'] ]], region_id[region])
+			['Country', 'Rating'] ]], g_regionId[region], g_contentHeight)
 		
 		file:write(line)
 		
 		-- start looping through all countries within that region
-		for key, value in pairs(countries) do
+		for key, value in pairs(g_countries) do
 			if key == region then
 				for key, value in pairs(value) do
 					line = string.format([[,
@@ -258,9 +275,9 @@ function loadCountries()
 					region = line
 					
 					-- initialise region table
-					countries[region] = {}
+					g_countries[region] = {}
 				elseif region ~= nil then
-					countries[region][line] = loadCountryData(region, line)
+					g_countries[region][line] = loadCountryData(region, line)
 				end
 			end
 		end
@@ -286,7 +303,7 @@ function loadCountryCodes()
 			if line:len() ~= 0 then
 				data = split(line, ":")
 				
-				country_codes[data[1]] = data[2]
+				g_countryCodes[data[1]] = data[2]
 			end
 		end
 		io.close( file )
@@ -311,7 +328,7 @@ function loadAdmins()
 			if line:len() ~= 0 then
 				data = split(line, ":")
 				
-				admins[data[1]] = data[2]
+				g_admins[data[1]] = data[2]
 			end
 		end
 		io.close( file )
