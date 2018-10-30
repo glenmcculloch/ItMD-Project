@@ -408,16 +408,25 @@ function loadAdmins()
 		print("File error: " .. errorString)
 	else
 		local line, data
+		local iter = 1
+		
 		-- iterate through each line in the file
 		for line in io.lines(path) do
 			-- length is 0, ignore this line
 			if line:len() ~= 0 then
 				data = split(line, ":")
 				
-				g_admins[data[1]] = data[2]
+				g_admins[data[1]] = {}
+				
+				g_admins[data[1]].password = data[2]
+				g_admins[data[1]].name = data[3]
+				
+				iter = iter + 1
 			end
 		end
 		io.close( file )
+		
+		print(string.format("Loaded (%d) admins", iter - 1))
 	end
 	
 	file = nil

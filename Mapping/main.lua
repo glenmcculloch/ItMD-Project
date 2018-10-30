@@ -41,6 +41,7 @@ g_contentWidth = display.actualContentWidth
 
 -- Variables about selections and current status
 g_currentRegion = 'World'
+g_currentUser = nil
 g_selection = nil
 g_selectionData = {}
 
