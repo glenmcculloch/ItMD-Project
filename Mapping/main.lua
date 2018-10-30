@@ -4,7 +4,6 @@
 --
 -----------------------------------------------------------------------------------------
 local composer = require( "File Functions" )
-local widget = require( "widget" )
 local composer = require( "composer" )
 
 -- holds all country data for our program
@@ -36,16 +35,33 @@ g_countryCharacteristic = {
 	['Additional Information'] = "..."
 }
 
+-- Device content height and width
 g_contentHeight = display.actualContentHeight
 g_contentWidth = display.actualContentWidth
 
-g_currentRegion = nil
+-- Variables about selections and current status
+g_currentRegion = 'World'
+g_selection = nil
+g_selectionData = {}
 
 g_displayMenu = display.newGroup()
 
-g_mapView_defaultCoordinates = {display.contentCenterX + 50, display.contentCenterY}
-g_mapView_hideCoordinates = {g_contentWidth + (g_contentWidth / 5), display.contentCenterY}
+-- Setup our map details
+g_mapView_size = {g_contentWidth, g_contentHeight - (g_contentHeight / 8)}
+g_mapView_defaultCoordinates = {display.contentCenterX, display.contentCenterY + (g_contentHeight / 8)}
+g_mapView_hideCoordinates = {g_mapView_size[1] * 2, display.contentCenterY + (g_contentHeight / 8)}
 g_mapView_hidden = false
+
+g_mapView = native.newWebView( g_mapView_defaultCoordinates[1], g_mapView_defaultCoordinates[2], g_mapView_size[1], g_mapView_size[2] )
+
+-- Setup our edit details area
+g_editView_defaultCoordinates = {display.contentCenterX, display.contentCenterY}
+g_editView_size = {g_mapView_size[1] - 100, g_contentHeight}
+
+-- Miscellaneous
+g_transitionTime = 2000	-- time for map shifts and other stuff
+g_iconSize = 40
+g_iconSeparation = {10, 30}
 
 
 -----------------------------------------------------------------------------------------
@@ -57,29 +73,19 @@ loadAdmins()
 loadCountries()
 loadCountryCodes()
 
+createWorldMap()
+
 -- Create all map files!
 for key,value in pairs(g_countries) do
 	print(string.format("Creating region map (%s)", key))
-	createHTMLFile(key)
+	createRegionMap(key)
 end
+
+--local editDetails_container = display.newRect(g_editView_defaultCoordinates[1], g_editView_defaultCoordinates[2], g_editView_size[1], g_editView_size[2])
+--editDetails_container.fill = {0.3,0.3,0.3,1}
 
 --[[LOAD THE MAIN MAP]]--
-
-local mapView = native.newWebView( display.contentCenterX + 50, display.contentCenterY, g_contentWidth - 100, g_contentHeight)
-mapView:request( "World-map.html", system.ResourceDirectory )
-
-local function webViewListener(event)
-
-	-- a region was clicked
-	if event.url and event.type == "other" then
-		local data = string.gsub(event.url, "%%20", " ")
-		data = split(data, ":")
-		
-		print(data[2])
-	end
-end
-
-mapView:addEventListener( "urlRequest", webViewListener )
+composer.gotoScene("mapScene")
 
 
 -----------------------------------------------------------------------------------------
@@ -246,13 +252,11 @@ oceaniaButton:setLabel( "Oceania" )
 
 --]]
 
-
+--[[
 ---------------------------------------------------------------------
 -- SEARCH BUTTON AND FIELD
 ---------------------------------------------------------------------
-local searchField
-
-local function searchListener( event )
+function searchListener( event )
 	
     if ( event.phase == "began" ) then
         -- User begins editing "defaultField"
@@ -274,7 +278,7 @@ local function searchListener( event )
 end
 
 -- Function to handle button events
-local function handleSearchButton( event )
+function handleSearchButton( event )
 	
     if ( "ended" == event.phase ) then
 		searchField = native.newTextField( display.contentCenterX, 0, g_contentWidth - 100, 50 )
@@ -283,7 +287,7 @@ local function handleSearchButton( event )
 end
  
 -- Create the widget
-local searchButton = widget.newButton(
+searchButton = widget.newButton(
     {
         width = 40,
         height = 40,
@@ -303,7 +307,7 @@ g_displayMenu:insert(searchButton)
 -- LOGIN BUTTON
 ---------------------------------------------------------------------
 -- Function to handle button events
-local function handleLoginButton( event )
+function handleLoginButton( event )
 	
     if ( "ended" == event.phase ) then
         print("Login Button was pressed!")
@@ -311,7 +315,7 @@ local function handleLoginButton( event )
 end
 
 -- Create the widget
-local loginButton = widget.newButton(
+loginButton = widget.newButton(
     {
         width = 40,
         height = 40,
@@ -331,23 +335,33 @@ g_displayMenu:insert(loginButton)
 -- EDIT BUTTON
 ---------------------------------------------------------------------
 -- Function to handle button events
-local function handleEditButton( event )
+function handleEditButton( event )
 	
     if ( "ended" == event.phase ) then
         print("Edit Button was pressed!")
 		
-		if g_mapView_hidden == false then
-			g_mapView_hidden = true
-			transition.moveTo(mapView, { x=g_mapView_hideCoordinates[1], y=g_mapView_hideCoordinates[2], time=400 })
+		if g_currentRegion ~= nil then
+			if g_mapView_hidden == false then
+				g_mapView_hidden = true
+				transition.moveTo(g_countryView, { x=g_mapView_hideCoordinates[1], y=g_mapView_hideCoordinates[2], time=400 })
+			else
+				g_mapView_hidden = false
+				transition.moveTo(g_countryView, { x=g_mapView_defaultCoordinates[1], y=g_mapView_defaultCoordinates[2], time=400 })
+			end
 		else
-			g_mapView_hidden = false
-			transition.moveTo(mapView, { x=g_mapView_defaultCoordinates[1], y=g_mapView_defaultCoordinates[2], time=400 })
+			if g_mapView_hidden == false then
+				g_mapView_hidden = true
+				transition.moveTo(g_worldView, { x=g_mapView_hideCoordinates[1], y=g_mapView_hideCoordinates[2], time=400 })
+			else
+				g_mapView_hidden = false
+				transition.moveTo(g_worldView, { x=g_mapView_defaultCoordinates[1], y=g_mapView_defaultCoordinates[2], time=400 })
+			end
 		end
 	end
 end
 
 -- Create the widget
-local editButton = widget.newButton(
+editButton = widget.newButton(
     {
         width = 40,
         height = 40,
@@ -356,8 +370,45 @@ local editButton = widget.newButton(
         onEvent = handleEditButton
     }
 )
+
 -- Center the button
 editButton.x = 0
 editButton.y = 130
 
 g_displayMenu:insert(editButton)
+
+
+---------------------------------------------------------------------
+-- BACK BUTTON
+---------------------------------------------------------------------
+-- Function to handle button events
+function handleBackButton( event )
+	
+    if ( "ended" == event.phase ) then
+        print("Back button was pressed!")
+		
+		if g_currentRegion ~= nil then
+			g_currentRegion = nil
+			
+			g_worldView.isVisible = true
+			composer.removeScene("mapScene")
+		end
+	end
+end
+
+-- Create the widget
+backButton = widget.newButton(
+    {
+        width = 40,
+        height = 40,
+        defaultFile = "back-icon.png",
+        overFile = "back-icon.png",
+        onEvent = handleBackButton
+    }
+)
+
+-- Center the button
+backButton.x = 0
+backButton.y = g_contentHeight - 50
+
+g_displayMenu:insert(backButton)]]--

@@ -85,30 +85,29 @@ end
 
 -- Function that searches for a specific country and returns either nil or a table
 function searchForCountry(country, region)
-	local found
+	local result
 	
 	-- search through specific region
-	if region ~= nil then
-		-- search through all regions
-		for key,value in pairs(g_countries[region]) do
-			if string.lower(key) == string.lower(country) then
-				found = region
-				break
-			end
-		end
-	-- search through all regions
-	else
+	if region == 'World' then
 		for key,value in pairs(g_countries) do
 			for key_2,value_2 in pairs(value) do
-				if string.lower(key) == string.lower(country) then
-					found = key
+				if string.lower(key_2) == string.lower(country) then
+					result = {key, key_2}
 					break
 				end
 			end
 		end
+	else
+		-- search through all regions
+		for key,value in pairs(g_countries[region]) do
+			if string.lower(key) == string.lower(country) then
+				result = {region, key}
+				break
+			end
+		end
 	end
 	
-	return found
+	return result
 end
 
 -- Function to set a country's characteristics value
@@ -145,7 +144,95 @@ function getCountryRating(region, country)
 end
 
 -- Function that creates an html page for our webview. This will be saved in documents directory
-function createHTMLFile(region)
+function createWorldMap()
+	local path = system.pathForFile("World-map.html", system.DocumentsDirectory)
+	local file, errorString = io.open(path, "w")
+
+	if not file then
+		print("File error: " .. errorString)
+	else
+		local line
+		
+		-- initial startup line
+		line = string.format([[
+<html>
+  <head>
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	
+	<script type="text/javascript">
+	  google.charts.load('current', {
+		'packages':['geochart'],
+		// Note: you will need to get a mapsApiKey for your project.
+		// See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings
+		'mapsApiKey': 'AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY'
+	  });
+	google.charts.setOnLoadCallback(drawVisualisation);
+	
+	function drawVisualisation() {
+		var options = {
+			region: 'world',
+			resolution: 'continents', 
+			colorAxis: {
+			colors: [
+				'red', // 1
+				'orange', // 2
+				'cyan', // 3
+				'purple', // 4
+				'yellow', // 5
+				], 
+				values: [1,2,3,4,5]
+			},
+			backgroundColor: '#000000',
+			legend: 'none',
+			width: %d, 
+			height: %d, 
+			keepAspectRatio: false
+		};
+		var data = google.visualization.arrayToDataTable([
+			['Region code', 'Continent', 'Value'] ,
+			['002', 'Africa', 1] ,
+			['150', 'Europe', 2] ,
+			['019', 'Americas', 3] ,
+			['142', 'Asia', 4] ,
+			['009', 'Oceania', 5]
+		]);
+		
+		var chart = new google.visualization.GeoChart(document.getElementById('geochart-colors'));
+		
+		google.visualization.events.addListener(chart, 'select', function(e) {
+			var selection = chart.getSelection();
+			if (selection.length == 1) {
+				var selectedRow = selection[0].row;
+				var selectedRegion = data.getFormattedValue(selection[0].row, 1);
+				
+				var link = "region:" + selectedRegion;
+				
+				document.getElementById("region").href=link;
+				document.getElementById("region").click();
+			}
+		});
+		
+		chart.draw(data, options);
+	}
+	
+	</script>
+  </head>
+  <body style="background:black">
+	<div id="geochart-colors"></div>
+	<a id="region" href=""></a>
+  </body>
+</html>]], g_mapView_size[1] - 10, g_mapView_size[2] - 10)
+		
+		file:write(line)
+		file:close()
+	end
+	
+	file = nil
+end
+
+-- Function that creates an html page for our webview. This will be saved in documents directory
+function createRegionMap(region)
 	local path = system.pathForFile(string.format("%s-map.html", region), system.DocumentsDirectory)
 	local file, errorString = io.open(path, "w")
 
@@ -194,7 +281,6 @@ function createHTMLFile(region)
 			datalessRegionColor: '#0000FF',
 			defaultColor: '#000000',
 			legend: 'none',
-			width: %d, 
 			keepAspectRatio: true
 		};
 		
