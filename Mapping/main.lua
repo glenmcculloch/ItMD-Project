@@ -50,15 +50,11 @@ g_displayMenu = display.newGroup()
 -- Setup our map details
 g_mapView_size = {g_contentWidth, g_contentHeight - (g_contentHeight / 8)}
 g_mapView_defaultCoordinates = {display.contentCenterX, display.contentCenterY + (g_contentHeight / 8)}
-g_mapView_hideCoordinates = {g_mapView_size[1] * 2, display.contentCenterY + (g_contentHeight / 8)}
+g_mapView_hideCoordinates = {display.contentCenterX, g_mapView_defaultCoordinates[2] + g_mapView_size[2]}
 g_mapView_hidden = false
 
--- Setup our edit details area
-g_editView_defaultCoordinates = {display.contentCenterX, display.contentCenterY}
-g_editView_size = {g_mapView_size[1] - 100, g_contentHeight}
-
 -- Miscellaneous
-g_transitionTime = 2000	-- time for map shifts and other stuff
+g_transitionTime = 1000	-- time for map shifts and other stuff
 g_iconSize = 40
 g_iconSeparation = {10, 30}
 

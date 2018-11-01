@@ -8,16 +8,8 @@ local widget = require( "widget" )
 local scene = composer.newScene()
 local mapView
 
--- Setup our map details
-mapView_size = {g_contentWidth, g_contentHeight - (g_contentHeight / 8)}
-mapView_defaultCoordinates = {display.contentCenterX, display.contentCenterY + (g_contentHeight / 8)}
-mapView_hideCoordinates = {mapView_size[1] * 2, display.contentCenterY + (g_contentHeight / 8)}
-mapView_hidden = false
-
--- Setup our edit details area
-editView_defaultCoordinates = {display.contentCenterX, display.contentCenterY}
-editView_size = {mapView_size[1] - 100, g_contentHeight}
-
+local infoContainer = display.newGroup()
+local info_Region = 'World'
 
 -- Function to listen to the webview and register any clicks on the map
 function webViewListener(event)
@@ -27,36 +19,60 @@ function webViewListener(event)
 		local data = string.gsub(event.url, "%%20", " ")
 		data = split(data, ":")
 		
-		print(data[2])
+		local regionSelected = data[2]
 		
+		-- load map only if we are on the world main view
 		if g_currentRegion == 'World' then
-			g_currentRegion = data[2]
-			loadMap(g_currentRegion)
+			loadMap(regionSelected)
 		end
+		
+		g_currentRegion = regionSelected
+		loadInformation(g_currentRegion)
 	end
 end
 
 function shiftMap()
-	if mapView_hidden == false then
-		mapView_hidden = true
-		transition.moveTo(mapView, { x=mapView_hideCoordinates[1], y=mapView_hideCoordinates[2], time=g_transitionTime })
+	if g_mapView_hidden == false then
+		g_mapView_hidden = true
+		transition.moveTo(mapView, { x=g_mapView_hideCoordinates[1], y=g_mapView_hideCoordinates[2], time=g_transitionTime })
 	else
-		mapView_hidden = false
-		transition.moveTo(mapView, { x=mapView_defaultCoordinates[1], y=mapView_defaultCoordinates[2], time=g_transitionTime })
+		g_mapView_hidden = false
+		transition.moveTo(mapView, { x=g_mapView_defaultCoordinates[1], y=g_mapView_defaultCoordinates[2], time=g_transitionTime })
 	end
 end
 
 function loadMap(region)
-	if mapView then 
+	-- remove mapview if it exists already (needed to reload the map)
+	if mapView then
 		mapView:removeSelf()
 	end
 	
 	g_currentRegion = region
 	
-	mapView = native.newWebView( mapView_defaultCoordinates[1], mapView_defaultCoordinates[2], mapView_size[1], mapView_size[2] )
+	-- request the correct map
+	mapView = native.newWebView( g_mapView_defaultCoordinates[1], g_mapView_defaultCoordinates[2], g_mapView_size[1], g_mapView_size[2] )
 	mapView:request( string.format("%s-map.html", region), system.DocumentsDirectory )
 	
 	mapView:addEventListener( "urlRequest", webViewListener )
+end
+
+function loadInformation(region)
+	-- remove mapview if it exists already (needed to reload the map)
+	if region == 'World' then
+		info_Region.text = "Legal Climates around the World"
+	else
+		info_Region.text = string.format("%s - Rating: %d", g_currentRegion, math.random(10))
+	end
+end
+
+function shiftMap()
+	if g_mapView_hidden == false then
+		g_mapView_hidden = true
+		transition.moveTo(mapView, { x=g_mapView_hideCoordinates[1], y=g_mapView_hideCoordinates[2], time=g_transitionTime })
+	else
+		g_mapView_hidden = false
+		transition.moveTo(mapView, { x=g_mapView_defaultCoordinates[1], y=g_mapView_defaultCoordinates[2], time=g_transitionTime })
+	end
 end
 
 
@@ -117,10 +133,10 @@ end
 -- EDIT BUTTON
 ---------------------------------------------------------------------
 -- Function to handle button events
-local function handleEditButton( event )
+local function handleInfoButton( event )
 	
     if ( "ended" == event.phase ) then
-        print("Edit Button was pressed!")
+        print("Info Button was pressed!")
 		
 		
 		shiftMap()
@@ -139,6 +155,7 @@ local function handleBackButton( event )
 		
 		if g_currentRegion ~= 'World' then
 			loadMap('World')
+			loadInformation('World')
 		end
 	end
 end
@@ -150,6 +167,18 @@ end
 function scene:create( event )
 
     local sceneGroup = self.view
+	
+	sceneGroup:insert(infoContainer)
+	
+	local infoBackground = display.newRect(g_mapView_defaultCoordinates[1], g_mapView_defaultCoordinates[2], g_mapView_size[1], g_mapView_size[2])
+	infoBackground:setFillColor(0.5)
+	
+	sceneGroup:insert(infoBackground)
+	
+	info_Region = display.newText('Legal Climates around the World', display.contentCenterX, g_iconSeparation[2], native.systemFont, 16)
+	info_Region:setFillColor(1,1,1)
+	
+	infoContainer:insert(info_Region)
 	
 	-- Back button
 	local backButton = widget.newButton(
@@ -169,21 +198,21 @@ function scene:create( event )
 	sceneGroup:insert(backButton)
 	
 	-- Edit button
-	local editButton = widget.newButton(
+	local infoButton = widget.newButton(
 		{
 			width = g_iconSize,
 			height = g_iconSize,
 			defaultFile = "edit-icon.png",
 			overFile = "edit-icon.png",
-			onEvent = handleEditButton
+			onEvent = handleInfoButton
 		}
 	)
 
 	-- place the button
-	editButton.x = g_contentWidth - 30 - 2 * ( g_iconSize + g_iconSeparation[1] )
-	editButton.y = g_iconSeparation[2]
+	infoButton.x = g_contentWidth - 30 - 2 * ( g_iconSize + g_iconSeparation[1] )
+	infoButton.y = g_iconSeparation[2]
 	
-	sceneGroup:insert(editButton)
+	sceneGroup:insert(infoButton)
 	
 	-- Login button
 	local loginButton = widget.newButton(
