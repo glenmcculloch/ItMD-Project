@@ -7,11 +7,14 @@ local composer = require( "composer" )
 local widget = require( "widget" )
 local scene = composer.newScene()
 
-
-local loginButton
-local loginText
 local usernameField
 local passwordField
+
+local options = {
+    isModal = true,
+    effect = "fade",
+    time = 400
+}
 
 
 ---------------------------------------------------------------------
@@ -26,8 +29,6 @@ local function checkLogin(username, password)
 	elseif ( g_admins[username].password == password ) then
 		g_currentUser = g_admins[username]
 		success = true
-		
-		print("Login successful!")
 		
 	-- login was different
 	else
@@ -67,6 +68,15 @@ local function handleLoginButton( event )
     end
 end
 
+local function handleCancelButton( event )
+ 
+    if ( "ended" == event.phase ) then
+		composer.removeScene(scene)
+		
+		composer.gotoScene("mapScene")
+    end
+end
+
 local function handleLogoutButton( event )
  
     if ( "ended" == event.phase ) then
@@ -80,59 +90,60 @@ end
 -- -----------------------------------------------------------------------------------
 function scene:create( event )
 
-    local screenGroup = self.view
+    local sceneGroup = self.view
 	
 	-- logged in
 	if g_currentUser ~= nil then
-		loginText = display.newText( string.format("Logged in as:\n%s", g_currentUser.name), display.contentCenterX, display.contentCenterY, native.systemFont, 16 )
+		local loginText = display.newText( string.format("Logged in as:\n%s", g_currentUser.name), display.contentCenterX, display.contentCenterY, native.systemFont, 16 )
 		
-		loginButton = widget.newButton({
-			x = display.contentCenterX,
+		local logoutButton = widget.newButton({
+			x = display.contentCenterX - 50,
 			y = display.contentCenterY + 110,
-			id = "logout",
-			label = "Logout",
-			onEvent = handleLoginButton
+			id = "login",
+			label = "Login",
+			onEvent = handleLogoutButton
 		})
 		
-		screenGroup:insert(loginText)
-		screenGroup:insert(loginButton)
+		sceneGroup:insert(logoutButton)
+		
+		local cancelButton = widget.newButton({
+			x = display.contentCenterX + 50,
+			y = display.contentCenterY + 110,
+			id = "cancel",
+			label = "Cancel",
+			onEvent = handleCancelButton
+		})
+		
+		sceneGroup:insert(loginText)
+		sceneGroup:insert(logoutButton)
+		sceneGroup:insert(cancelButton)
 		
 	-- need to login
 	else
-		loginText = display.newText( "Administrator Login", display.contentCenterX, display.contentCenterY, native.systemFont, 16 )
+		local loginText = display.newText( "Administrator Login", display.contentCenterX, display.contentCenterY, native.systemFont, 16 )
 		
-		screenGroup:insert(loginText)
+		sceneGroup:insert(loginText)
 		
-		usernameField = native.newTextField( display.contentCenterX, display.contentCenterY + 30, 220, 36 )
-		usernameField.font = native.newFont( native.systemFontBold, 24 )
-		usernameField.placeholder = "Username"
-		usernameField:setTextColor( 0.4, 0.4, 0.8 )
-		usernameField:addEventListener( "userInput", onUsername )
-		
-		screenGroup:insert(usernameField)
-		
-		passwordField = native.newTextField( display.contentCenterX, display.contentCenterY + 70, 220, 36 )
-		passwordField.font = native.newFont( native.systemFontBold, 24 )
-		passwordField.placeholder = "Password"
-		passwordField.isSecure = true
-		passwordField:setTextColor( 0.4, 0.4, 0.8 )
-		passwordField:addEventListener( "userInput", onPassword )
-		
-		screenGroup:insert(passwordField)
-		
-		loginButton = widget.newButton({
-			x = display.contentCenterX,
+		local loginButton = widget.newButton({
+			x = display.contentCenterX - 50,
 			y = display.contentCenterY + 110,
 			id = "login",
 			label = "Login",
 			onEvent = handleLoginButton
 		})
 		
-		screenGroup:insert(loginButton)
+		sceneGroup:insert(loginButton)
 		
+		local cancelButton = widget.newButton({
+			x = display.contentCenterX + 50,
+			y = display.contentCenterY + 110,
+			id = "cancel",
+			label = "Cancel",
+			onEvent = handleCancelButton
+		})
+		
+		sceneGroup:insert(cancelButton)
 	end
-	
-	shiftMap()
 end
 
 function scene:show( event )
@@ -145,7 +156,20 @@ function scene:show( event )
  
     elseif ( phase == "did" ) then
         -- Code here runs when the scene is entirely on screen
- 
+		
+		usernameField = native.newTextField( display.contentCenterX, display.contentCenterY + 30, 220, 36 )
+		usernameField.font = native.newFont( native.systemFontBold, 24 )
+		usernameField.placeholder = "Username"
+		usernameField:setTextColor( 0.4, 0.4, 0.8 )
+		usernameField:addEventListener( "userInput", onUsername )
+		
+		passwordField = native.newTextField( display.contentCenterX, display.contentCenterY + 70, 220, 36 )
+		passwordField.font = native.newFont( native.systemFontBold, 24 )
+		passwordField.placeholder = "Password"
+		passwordField.isSecure = true
+		passwordField:setTextColor( 0.4, 0.4, 0.8 )
+		passwordField:addEventListener( "userInput", onPassword )
+		
     end
 end
 
@@ -156,7 +180,13 @@ function scene:hide( event )
  
     if ( phase == "will" ) then
         -- Code here runs when the scene is on screen (but is about to go off screen)
- 
+		usernameField:removeSelf()
+		usernameField = nil
+		
+        passwordField:removeSelf()
+        passwordField = nil
+		
+		
     elseif ( phase == "did" ) then
         -- Code here runs immediately after the scene goes entirely off screen
  

@@ -53,8 +53,6 @@ g_mapView_defaultCoordinates = {display.contentCenterX, display.contentCenterY +
 g_mapView_hideCoordinates = {g_mapView_size[1] * 2, display.contentCenterY + (g_contentHeight / 8)}
 g_mapView_hidden = false
 
-g_mapView = native.newWebView( g_mapView_defaultCoordinates[1], g_mapView_defaultCoordinates[2], g_mapView_size[1], g_mapView_size[2] )
-
 -- Setup our edit details area
 g_editView_defaultCoordinates = {display.contentCenterX, display.contentCenterY}
 g_editView_size = {g_mapView_size[1] - 100, g_contentHeight}
@@ -80,6 +78,10 @@ createWorldMap()
 for key,value in pairs(g_countries) do
 	print(string.format("Creating region map (%s)", key))
 	createRegionMap(key)
+end
+
+for key,value in pairs(g_countries['Africa']['Kenya']) do
+	print(string.format("%s - %s", key, value))
 end
 
 --local editDetails_container = display.newRect(g_editView_defaultCoordinates[1], g_editView_defaultCoordinates[2], g_editView_size[1], g_editView_size[2])
