@@ -31,15 +31,19 @@ function loadCountryData(region, country)
 	if file then
 		print("FOUND FILE")
 		local s
+		local characteristic
+		local value
 		for line in io.lines(path) do
 			if line:len() ~= 0 then
 				-- split the line (format characteristic=value)
 				s = split(line, "=")
+				characteristic = s[1]
+				value = s[2]
 				
-				if s[1] == "Additional Information" then
-					result[s[1]] = s[2]
+				if characteristic == "Additional Information" then
+					result[characteristic] = value
 				else
-					result[s[1]] = tonumber(s[2])
+					result[characteristic] = tonumber(value)
 				end
 			end
 		end
@@ -387,7 +391,7 @@ function loadCountryCodes()
 	
 	file = nil
 end
-
+--country = {name: "", code: "", characteristics: "", information: "", region: ""}
 -- Function to load all admins from the file into the application
 function loadAdmins()
 

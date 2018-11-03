@@ -37,7 +37,7 @@ function scene:create( event )
     local sceneGroup = self.view
 	
 	local background = display.newRect( display.contentCenterX, display.contentCenterY, 0.5 * g_contentWidth, 0.5 * g_contentHeight )
-	background:setFillColor('black'	)
+	background:setFillColor('black')
 	
 	sceneGroup:insert(background)
 	
@@ -81,24 +81,21 @@ function scene:show( event )
     local phase = event.phase
 	
     if ( phase == "will" ) then
-        -- Code here runs when the scene is still off screen (but is about to come on screen)
+        --[[ Code here runs when the scene is still off screen (but is about to come on screen) --]]
 		
 		parent = event.parent
 		params = event.params
-		
-		print(params.type)
 		
 		if params.type == 'Login' then
 			text.text = "You are logged in as\n" .. g_currentUser.name
 		elseif params.type == 'Logout' then
 			text.text = "You have successfully logged out."
 		elseif params.type == 'Failed' then
-			print("FAILED")
 			text.text = "Wrong username/password"
 		end
 		
     elseif ( phase == "did" ) then
-        -- Code here runs when the scene is entirely on screen
+        --[[ Code here runs when the scene is entirely on screen --]]
 		
     end
 end
@@ -109,9 +106,9 @@ function scene:hide( event )
     local phase = event.phase
  
     if ( phase == "will" ) then
-        -- Code here runs when the scene is on screen (but is about to go off screen)
+        --[[ Code here runs when the scene is on screen (but is about to go off screen) --]]
     elseif ( phase == "did" ) then
-        -- Code here runs immediately after the scene goes entirely off screen
+        --[[ Code here runs immediately after the scene goes entirely off screen --]]
  
     end
 end
@@ -119,7 +116,7 @@ end
 function scene:destroy( event )
  
     local sceneGroup = self.view
-    -- Code here runs prior to the removal of scene's view
+    --[[ Code here runs prior to the removal of scene's view --]]
  
 end
 

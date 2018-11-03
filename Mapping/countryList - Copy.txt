@@ -1,0 +1,209 @@
+Algeria:Africa:DZ
+Angola:Africa:AO
+Benin:Africa:BJ
+Botswana:Africa:BW
+Burkina Faso:Africa:BF
+Burundi:Africa:BI
+Cape Verde:Africa:CV
+Cameroon:Africa:CM
+Central African Republic:Africa:CF
+Chad:Africa:TD
+Comoros:Africa:KM
+Congo, the Democratic Republic of the:Africa:CD
+Cote D'ivoire:Africa:CI
+Djibouti:Africa:DJ
+Egypt:Africa:EG
+Equatorial Guinea:Africa:GQ
+Eritrea:Africa:ER
+Ethiopia:Africa:ET
+Gabon:Africa:GA
+Gambia:Africa:GM
+Ghana:Africa:GH
+Guinea:Africa:GN
+Guinea-Bissau:Africa:GW
+Kenya:Africa:KE
+Lesotho:Africa:LS
+Liberia:Africa:LR
+Libya:Africa:LY
+Madagascar:Africa:MG
+Malawi:Africa:MW
+Mali:Africa:ML
+Mauritania:Africa:MR
+Mauritius:Africa:MU
+Morocco:Africa:MA
+Mozambique:Africa:MZ
+Namibia:Africa:NA
+Niger:Africa:NE
+Nigeria:Africa:NG
+Rwanda:Africa:RW
+Sao Tome and Principe:Africa:ST
+Senegal:Africa:SN
+Seychelles:Africa:SC
+Sierra Leone:Africa:SL
+Somalia:Africa:SO
+South Africa:Africa:ZA
+South Sudan:SS
+Sudan:Africa:SD
+Swaziland:Africa:SZ
+Tanzania:Africa:TZ
+Togo:Africa:TG
+Tunisia:Africa:TN
+Uganda:Africa:UG
+Western Sahara:Africa:EH
+Zambia:Africa:ZM
+Zimbabwe:Africa:ZW
+
+Antigua and Barbuda:Americas:AG
+Argentina:Americas:AR
+Bahamas:Americas:BS
+Barbados:Americas:BB
+Belize:Americas:BZ
+Bolivia:Americas:BO
+Brazil:Americas:BR
+Canada:Americas:CA
+Chile:Americas:CL
+Colombia:Americas:CO
+Costa Rica:Americas:CR
+Cuba:Americas:CU
+Dominica:Americas:DM
+Dominican Republic:Americas:DO
+Ecuador:Americas:EC
+El Salvador:Americas:SV
+Grenada:Americas:GD
+Guatemala:Americas:GT
+Guyana:Americas:GY
+Haiti:Americas:HT
+Honduras:Americas:HN
+Jamaica:Americas:JM
+Mexico:Americas:MX
+Nicaragua:Americas:NI
+Panama:Americas:PA
+Paraguay:Americas:PY
+Peru:Americas:PE
+Saint Kitts and Nevis:Americas:KN
+Saint Lucia:Americas:LC
+Saint Vincent and the Grenadines:Americas:VC
+Suriname:Americas:SR
+Trinidad and Tobago:Americas:TT
+United States of America:Americas:US
+Uruguay:Americas:UY
+Venezuala:Americas:VE
+
+Afghanistan:Asia:AF
+Armenia:Asia:AM
+Azerbaijan:Asia:AZ
+Bahrain:Asia:BH
+Bangladesh:Asia:BD
+Bhutan:Asia:BT
+Brunei:Asia:BN
+Cambodia:Asia:KH
+China:Asia:CN
+Cyprus:Asia:CY
+Georgia:Asia:DE
+India:Asia:IN
+Indonesia:Asia:ID
+Iran:Asia:IR
+Iraq:Asia:IQ
+Israel:Asia:IL
+Japan:Asia:JP
+Jordan:Asia:JO
+Kazakhstan:Asia:KZ
+Kuwait:Asia:KW
+Kyrgyzstan:Asia:KG
+Laos:Asia:LA
+Lebanon:Asia:LB
+Malaysia:Asia:MY
+Maldives:Asia:MV
+Mongolia:Asia:MN
+Myanmar:Asia:MM
+Nepal:Asia:NP
+North Korea:Asia:KP
+Oman:Asia:OM
+Pakistan:Asia:PK
+Palestine:Asia:PS
+Philippines:Asia:PH
+Qatar:Asia:QA
+Russia:Asia:RU
+Saudi Arabia:Asia:SA
+Singapore:Asia:SG
+South Korea:Asia:KR
+Sri Lanka:Asia:LK
+Syria:Asia:SY
+Taiwan:Asia:TW
+Tajikistan:Asia:TJ
+Thailand:Asia:TH
+East Timor:Asia:TL
+Turkey:Asia:TR
+Turkmenistan:Asia:TM
+United Arab Emirates:Asia:AE
+Uzbekistan:Asia:UZ
+Vietnam:Asia:VN
+Yemen:Asia:YE
+
+Albania:Europe:AL
+Andorra:Europe:AD
+Armenia:Europe:AM
+Austria:Europe:AT
+Azerbaijan:Europe:AZ
+Belarus:Europe:BY
+Belgium:Europe:BE
+Bosnia and Herzegovina:Europe:BA
+Bulgaria:Europe:BG
+Croatia:Europe:HR
+Cyprus:Europe:CY
+Czech Republic:Europe:CZ
+Denmark:Europe:DK
+Estonia:Europe:EE
+Finland:Europe:FI
+France:Europe:FR
+Georgia:Europe:GE
+Germany:Europe:DE
+Greece:Europe:GR
+Hungary:Europe:HU
+Iceland:Europe:IS
+Ireland:Europe:IE
+Italy:Europe:IT
+Kazakhstan:Europe:KZ
+Kosovo:Europe:RS
+Latvia:Europe:LV
+Liechtenstein:Europe:LI
+Lithuania:Europe:LT
+Luxembourg:Europe:LU
+Macedonia:Europe:MK
+Malta:Europe:MT
+Moldova:Europe:MD
+Monaco:Europe:MC
+Montenegro:Europe:ME
+Netherlands:Europe:NL
+Norway:Europe:NO
+Poland:Europe:PL
+Portugal:Europe:PT
+Romania:Europe:RO
+Russia:Europe:RU
+San Marino:Europe:SM
+Serbia:Europe:RS
+Slovakia:Europe:SK
+Slovenia:Europe:SI
+Spain:Europe:ES
+Sweden:Europe:SE
+Switzerland:Europe:CH
+Turkey:Europe:TR
+Ukraine:Europe:UA
+United Kingdom:Europe:GB
+Vatican City:Europe:VA
+
+Australia:Oceania:AU
+Fiji:Oceania:FJ
+Kiribati:Oceania:KI
+Marshall Islands:Oceania:MH
+Micronesia:Oceania:FM
+Nauru:Oceania:NR
+New Caledonia:Oceania:NC
+New Zealand:Oceania:NZ
+Palau:Oceania:PW
+Papua New Guinea:Oceania:PG
+Samoa:Oceania:WS
+Solomon Islands:Oceania:SB
+Tonga:Oceania:TO
+Tuvalu:Oceania:TV
+Vanuatu:Oceania:VU

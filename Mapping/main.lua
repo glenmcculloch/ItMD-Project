@@ -20,20 +20,30 @@ g_regionId = {
 }
 
 g_countrySetting = {
-	[0] = "Unknown", 
-	[1] = "No", 
-	[2] = "Yes"
+	[1] = "???", 
+	[2] = "No", 
+	[3] = "Yes"
 }
 
 -- all country characteristics with default values
 g_countryCharacteristic = {
-	['Rating'] = 0, 
-	['Torture'] = 0, 
-	['Death Penalty'] = 0, 
-	['Conflict'] = 0, 
-	['State Oppression'] = 0, 
-	['Legal Torture'] = 0, 
+	['Rating'] = 1, 
+	['Torture'] = 1, 
+	['Death Penalty'] = 1, 
+	['Conflict'] = 1, 
+	['State Oppression'] = 1, 
+	['Legal Torture'] = 1, 
 	['Additional Information'] = "..."
+}
+
+g_countryCharacteristics = {
+	[1] = {id='Rating', value=0},
+	[2] = {id='Torture', value=1},
+	[3] = {id='Death Penalty', value=1},
+	[4] = {id='Conflict', value=1},
+	[5] = {id='State Oppression', value=1},
+	[6] = {id='Legal Torture', value=1},
+	[7] = {id='Additional Information', value='...'}
 }
 
 -- Device content height and width

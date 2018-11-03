@@ -100,12 +100,23 @@ function loadInformation(region, country)
 end
 
 function shiftMap()
+
 	if g_mapView_hidden == false then
 		g_mapView_hidden = true
 		transition.moveTo(mapView, { x=g_mapView_hideCoordinates[1], y=g_mapView_hideCoordinates[2], time=g_transitionTime })
+		
+		-- show edit button (if user is logged in)
+		if g_currentCountry ~= nil and g_currentUser ~= nil then
+			editButton.isVisible = true
+		end
 	else
 		g_mapView_hidden = false
 		transition.moveTo(mapView, { x=g_mapView_defaultCoordinates[1], y=g_mapView_defaultCoordinates[2], time=g_transitionTime })
+		
+		-- hide button if necessary
+		if g_currentCountry ~= nil and g_currentUser ~= nil then
+			editButton.isVisible = false
+		end
 	end
 end
 
@@ -197,16 +208,8 @@ local function handleInfoButton( event )
     if ( "ended" == event.phase ) then
         print("Info Button was pressed!")
 		
-		
-		shiftMap()
-		
-		if g_currentUser ~= nil and g_currentCountry ~= nil then
-			if editButton.isVisible == true then
-				editButton.isVisible = false
-			else
-				editButton.isVisible = true
-			end
-		end
+		--shiftMap()
+		composer.gotoScene("editScene")
 	end
 end
 
@@ -222,7 +225,7 @@ local function handleEditButton( event )
 		
 		-- just to make sure that admin is logged in
 		if g_currentUser ~= nil then
-			print("GOING TO EDIT PAGE")
+			composer.gotoScene("editScene")
 		end
 	end
 end
@@ -270,16 +273,36 @@ function scene:create( event )
 	infoContainer:insert(info_Region)
 	
 	-- country detail information
-	info_Details = display.newText("Please click on a country to view it's details.", display.contentCenterX - ( g_contentWidth / 4 ) , g_mapView_defaultCoordinates[2], ( g_mapView_size[1] / 2 ) - 50, g_mapView_size[2] - 50, native.systemFont, 16 )
-	info_Details.align = "left"
+	info_Details = display.newText(
+		{
+			text = "Please click on a country to view it's details.", 
+			x = display.contentCenterX - ( g_contentWidth / 4 ), 
+			y = g_mapView_defaultCoordinates[2], 
+			width = ( g_mapView_size[1] / 2 ) - 50, 
+			height = g_mapView_size[2], 
+			font = native.systemFont, 
+			fontSize = 16, 
+			align = "left"
+		}
+	)
 	
 	info_Details:setFillColor(1, 0, 0)
 	
 	infoContainer:insert(info_Details)
 	
 	-- additional information
-	info_Additional = display.newText("...", display.contentCenterX + ( g_contentWidth / 4 ) , g_mapView_defaultCoordinates[2], ( g_mapView_size[1] / 2 ) - 50, g_mapView_size[2] - 50, native.systemFont, 16 )
-	info_Additional.align = "left"
+	info_Additional = display.newText(
+		{
+			text = "...", 
+			x = display.contentCenterX + ( g_contentWidth / 4 ),
+			y = g_mapView_defaultCoordinates[2], 
+			width = ( g_mapView_size[1] / 2 ) - 50, 
+			height = g_mapView_size[2], 
+			font = native.systemFont, 
+			fontSize = 16, 
+			align = "left"
+		}
+	)
 	
 	info_Additional:setFillColor(1, 1, 1)
 	
@@ -399,6 +422,11 @@ function scene:hide( event )
             mapView:removeSelf()
             mapView = nil
         end
+		
+		if searchField and searchField.removeSelf then
+			searchField:removeSelf()
+			searchField = nil
+		end
     elseif ( phase == "did" ) then
         -- Code here runs immediately after the scene goes entirely off screen
  
