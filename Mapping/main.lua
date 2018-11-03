@@ -20,17 +20,18 @@ g_regionId = {
 }
 
 g_countrySetting = {
-	"...", 	-- 0
-	"No", 	-- 1
-	"Yes"	-- 2
+	[0] = "Unknown", 
+	[1] = "No", 
+	[2] = "Yes"
 }
 
 -- all country characteristics with default values
 g_countryCharacteristic = {
+	['Rating'] = 0, 
 	['Torture'] = 0, 
 	['Death Penalty'] = 0, 
 	['Conflict'] = 0, 
-	['State of Oppression'] = 0, 
+	['State Oppression'] = 0, 
 	['Legal Torture'] = 0, 
 	['Additional Information'] = "..."
 }
@@ -40,12 +41,9 @@ g_contentHeight = display.actualContentHeight
 g_contentWidth = display.actualContentWidth
 
 -- Variables about selections and current status
-g_currentRegion = 'World'
 g_currentUser = nil
-g_selection = nil
-g_selectionData = {}
-
-g_displayMenu = display.newGroup()
+g_currentRegion = 'World'
+g_currentCountry = nil
 
 -- Setup our map details
 g_mapView_size = {g_contentWidth, g_contentHeight - (g_contentHeight / 8)}
@@ -74,10 +72,6 @@ createWorldMap()
 for key,value in pairs(g_countries) do
 	print(string.format("Creating region map (%s)", key))
 	createRegionMap(key)
-end
-
-for key,value in pairs(g_countries['Africa']['Kenya']) do
-	print(string.format("%s - %s", key, value))
 end
 
 --local editDetails_container = display.newRect(g_editView_defaultCoordinates[1], g_editView_defaultCoordinates[2], g_editView_size[1], g_editView_size[2])

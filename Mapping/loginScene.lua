@@ -7,14 +7,43 @@ local composer = require( "composer" )
 local widget = require( "widget" )
 local scene = composer.newScene()
 
+local loginText
+local loginButton
+local cancelButton
 local usernameField
 local passwordField
 
+-- login overlay
 local options = {
-    isModal = true,
     effect = "fade",
-    time = 400
+    time = 500,
+    isModal = true
 }
+
+local function openOverlay(type)
+	if usernameField then
+		usernameField.isVisible = false
+		passwordField.isVisible = false
+	end
+	
+	options.params = {type=type}
+	composer.showOverlay("loginOverlay", options)
+end
+
+function scene:closeOverlay(exit)
+	
+	if exit then
+		composer.hideOverlay()
+		composer.removeScene(scene)
+		
+		composer.gotoScene("mapScene")
+	else
+		composer.hideOverlay( "fade", 400 )
+		
+		usernameField.isVisible = true
+		passwordField.isVisible = true
+	end
+end
 
 
 ---------------------------------------------------------------------
@@ -22,17 +51,17 @@ local options = {
 ---------------------------------------------------------------------
 local function checkLogin(username, password)
 	-- username doesn't exist
-	if g_admins[username] == nil then
-		print("Username not found!")
-		
-	-- login is successful (it's a match!)
-	elseif ( g_admins[username].password == password ) then
-		g_currentUser = g_admins[username]
-		success = true
-		
-	-- login was different
+	if g_admins[username] ~= nil then
+		if g_admins[username].password == password then
+			g_currentUser = g_admins[username]
+			
+			openOverlay('Login')
+		else
+			openOverlay('Failed')
+		end
+	-- login is unsuccessful (it's a match!)
 	else
-		print("Password did not match!")
+		openOverlay('Failed')
 	end
 end
 
@@ -62,8 +91,17 @@ end
 local function handleLoginButton( event )
  
     if ( "ended" == event.phase ) then
-		if usernameField.text ~= nil and passwordField ~= nil then
-			checkLogin(usernameField.text, passwordField.text)
+	
+		-- logout
+		if g_currentUser ~= nil then
+			g_currentUser = nil
+			
+			openOverlay('Logout')
+		-- login
+		else
+			if usernameField.text ~= nil and passwordField ~= nil then
+				checkLogin(usernameField.text, passwordField.text)
+			end
 		end
     end
 end
@@ -72,15 +110,7 @@ local function handleCancelButton( event )
  
     if ( "ended" == event.phase ) then
 		composer.removeScene(scene)
-		
 		composer.gotoScene("mapScene")
-    end
-end
-
-local function handleLogoutButton( event )
- 
-    if ( "ended" == event.phase ) then
-        g_currentUser = nil
     end
 end
 
@@ -89,61 +119,40 @@ end
 -- Scene event functions
 -- -----------------------------------------------------------------------------------
 function scene:create( event )
+	print("SCENE IS BEING CREATED")
 
     local sceneGroup = self.view
 	
-	-- logged in
-	if g_currentUser ~= nil then
-		local loginText = display.newText( string.format("Logged in as:\n%s", g_currentUser.name), display.contentCenterX, display.contentCenterY, native.systemFont, 16 )
-		
-		local logoutButton = widget.newButton({
-			x = display.contentCenterX - 50,
-			y = display.contentCenterY + 110,
-			id = "login",
-			label = "Login",
-			onEvent = handleLogoutButton
-		})
-		
-		sceneGroup:insert(logoutButton)
-		
-		local cancelButton = widget.newButton({
-			x = display.contentCenterX + 50,
-			y = display.contentCenterY + 110,
-			id = "cancel",
-			label = "Cancel",
-			onEvent = handleCancelButton
-		})
-		
-		sceneGroup:insert(loginText)
-		sceneGroup:insert(logoutButton)
-		sceneGroup:insert(cancelButton)
-		
-	-- need to login
-	else
-		local loginText = display.newText( "Administrator Login", display.contentCenterX, display.contentCenterY, native.systemFont, 16 )
-		
-		sceneGroup:insert(loginText)
-		
-		local loginButton = widget.newButton({
-			x = display.contentCenterX - 50,
-			y = display.contentCenterY + 110,
-			id = "login",
-			label = "Login",
-			onEvent = handleLoginButton
-		})
-		
-		sceneGroup:insert(loginButton)
-		
-		local cancelButton = widget.newButton({
-			x = display.contentCenterX + 50,
-			y = display.contentCenterY + 110,
-			id = "cancel",
-			label = "Cancel",
-			onEvent = handleCancelButton
-		})
-		
-		sceneGroup:insert(cancelButton)
-	end
+	loginText = display.newText({
+		text = "Administrator Login", 
+		x = display.contentCenterX, 
+		y = display.contentCenterY, 
+		font = native.systemFont, 
+		fontSize = 16, 
+		align = "center"
+	})
+	
+	sceneGroup:insert(loginText)
+	
+	loginButton = widget.newButton({
+		x = display.contentCenterX - 50,
+		y = display.contentCenterY + 60,
+		id = "login",
+		label = "Login",
+		onEvent = handleLoginButton
+	})
+	
+	sceneGroup:insert(loginButton)
+	
+	cancelButton = widget.newButton({
+		x = display.contentCenterX + 50,
+		y = display.contentCenterY + 60,
+		id = "cancel",
+		label = "Cancel",
+		onEvent = handleCancelButton
+	})
+	
+	sceneGroup:insert(cancelButton)
 end
 
 function scene:show( event )
@@ -152,24 +161,37 @@ function scene:show( event )
     local phase = event.phase
  
     if ( phase == "will" ) then
-        -- Code here runs when the scene is still off screen (but is about to come on screen)
- 
+        --[[ Code here runs when the scene is still off screen (but is about to come on screen) --]]
+		
+		-- logout
+		if g_currentUser ~= nil then
+			loginText.text = "Logged in as:\n\n" .. g_currentUser.name
+			loginText.y = display.contentCenterY
+			loginButton:setLabel("Logout")
+		-- login
+		else
+			loginText.text = "Administrator Login"
+			loginText.y = display.contentCenterY - 60
+			loginButton:setLabel("Login")
+		end
     elseif ( phase == "did" ) then
-        -- Code here runs when the scene is entirely on screen
+        --[[ Code here runs when the scene is entirely on screen --]]
 		
-		usernameField = native.newTextField( display.contentCenterX, display.contentCenterY + 30, 220, 36 )
-		usernameField.font = native.newFont( native.systemFontBold, 24 )
-		usernameField.placeholder = "Username"
-		usernameField:setTextColor( 0.4, 0.4, 0.8 )
-		usernameField:addEventListener( "userInput", onUsername )
-		
-		passwordField = native.newTextField( display.contentCenterX, display.contentCenterY + 70, 220, 36 )
-		passwordField.font = native.newFont( native.systemFontBold, 24 )
-		passwordField.placeholder = "Password"
-		passwordField.isSecure = true
-		passwordField:setTextColor( 0.4, 0.4, 0.8 )
-		passwordField:addEventListener( "userInput", onPassword )
-		
+		-- only create fields if we're logging in
+		if g_currentUser == nil then
+			usernameField = native.newTextField( display.contentCenterX, display.contentCenterY - 20, 220, 36 )
+			usernameField.font = native.newFont( native.systemFontBold, 24 )
+			usernameField.placeholder = "Username"
+			usernameField:setTextColor( 0.4, 0.4, 0.8 )
+			usernameField:addEventListener( "userInput", onUsername )
+			
+			passwordField = native.newTextField( display.contentCenterX, display.contentCenterY + 20, 220, 36 )
+			passwordField.font = native.newFont( native.systemFontBold, 24 )
+			passwordField.placeholder = "Password"
+			passwordField.isSecure = true
+			passwordField:setTextColor( 0.4, 0.4, 0.8 )
+			passwordField:addEventListener( "userInput", onPassword )
+		end
     end
 end
 
@@ -179,16 +201,17 @@ function scene:hide( event )
     local phase = event.phase
  
     if ( phase == "will" ) then
-        -- Code here runs when the scene is on screen (but is about to go off screen)
-		usernameField:removeSelf()
-		usernameField = nil
+        --[[ Code here runs when the scene is on screen (but is about to go off screen) --]]
 		
-        passwordField:removeSelf()
-        passwordField = nil
-		
-		
+		if usernameField then
+			usernameField:removeSelf()
+			usernameField = nil
+			
+			passwordField:removeSelf()
+			passwordField = nil
+		end
     elseif ( phase == "did" ) then
-        -- Code here runs immediately after the scene goes entirely off screen
+        --[[ Code here runs immediately after the scene goes entirely off screen --]]
  
     end
 end

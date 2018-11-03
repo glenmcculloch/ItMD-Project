@@ -9,25 +9,41 @@ local scene = composer.newScene()
 local mapView
 
 local infoContainer = display.newGroup()
-local info_Region = 'World'
+local info_Region
+local info_Additional
+local info_Details
+
+-- needs to be used globally in this file (to set visible or not)
+local editButton
 
 -- Function to listen to the webview and register any clicks on the map
 function webViewListener(event)
 
-	-- a country was clicked
+	-- a region was clicked
 	if event.url and event.type == "other" then
 		local data = string.gsub(event.url, "%%20", " ")
 		data = split(data, ":")
 		
-		local regionSelected = data[2]
+		local selectedRegion = data[2]
 		
-		-- load map only if we are on the world main view
-		if g_currentRegion == 'World' then
-			loadMap(regionSelected)
+		-- check if it was a region that was selected, or a country
+		local isRegion = false
+		for key,value in pairs(g_countries) do
+			if key == selectedRegion then
+				isRegion = true
+			end
 		end
 		
-		g_currentRegion = regionSelected
-		loadInformation(g_currentRegion)
+		-- load regional map if it was a region
+		if isRegion then
+			loadMap(selectedRegion)
+			g_currentRegion = selectedRegion
+		-- if it was not a region, set country selected
+		else
+			g_currentCountry = selectedRegion
+		end
+		
+		loadInformation(g_currentRegion, g_currentCountry)
 	end
 end
 
@@ -47,8 +63,6 @@ function loadMap(region)
 		mapView:removeSelf()
 	end
 	
-	g_currentRegion = region
-	
 	-- request the correct map
 	mapView = native.newWebView( g_mapView_defaultCoordinates[1], g_mapView_defaultCoordinates[2], g_mapView_size[1], g_mapView_size[2] )
 	mapView:request( string.format("%s-map.html", region), system.DocumentsDirectory )
@@ -56,12 +70,32 @@ function loadMap(region)
 	mapView:addEventListener( "urlRequest", webViewListener )
 end
 
-function loadInformation(region)
-	-- remove mapview if it exists already (needed to reload the map)
+-- loads information into the background when a region/country is clicked
+function loadInformation(region, country)
+	
+	-- world information (load details)
 	if region == 'World' then
 		info_Region.text = "Legal Climates around the World"
+		info_Details.text = "Please click on a country to view it's details."
+		info_Additional.text = ""
+	-- country is selected, load the details!
+	elseif country ~= nil then
+		info_Region.text = string.format("%s - Rating: %s", country, g_countries[region][country]['Rating'])
+		
+		local line = "Country Characteristics:\n"
+		
+		-- start looping through all characteristics for this country
+		for key, value in pairs(g_countryCharacteristic) do
+			if key ~= 'Rating' and key ~= 'Additional Information' then
+				print(key .. " - " .. g_countrySetting[g_countries[region][country][key]])
+				line = line .. '\n' .. key .. " - " .. g_countrySetting[g_countries[region][country][key]]
+			end
+		end
+		
+		info_Details.text = line
+		info_Additional.text = "Information:\n\n" .. g_countries[region][country]['Additional Information']
 	else
-		info_Region.text = string.format("%s - Rating: %d", g_currentRegion, math.random(10))
+		info_Region.text = string.format("%s", region)
 	end
 end
 
@@ -79,6 +113,7 @@ end
 ---------------------------------------------------------------------
 -- SEARCH BUTTON AND FIELD
 ---------------------------------------------------------------------
+local searchField
 local function onSearch( event )
 	
     if ( event.phase == "began" ) then
@@ -87,19 +122,33 @@ local function onSearch( event )
     elseif ( event.phase == "submitted" ) then
 	
         if event.target.text ~= nil then
-			local result = searchForCountry(event.target.text, g_currentRegion)
+			local result = searchForCountry(event.target.text)
 			
+			-- found the country!
 			if result ~= nil then
+				
+				-- load map only if it is in a different region
+				if g_currentRegion ~= result[1] then
+					loadMap(result[1])
+				end
+				
+				-- same again, load information only if it isn't the same country
+				if g_currentCountry ~= result[1] then
+					loadInformation(result[1], result[2])
+				end
+				
+				-- set our current region and country
 				g_currentRegion = result[1]
-				g_currentSelection = result[2]
-				
-				g_selectionData = g_countries[result[1]][result[2]]
-				
-				loadMap(g_currentRegion)
+				g_currentCountry = result[2]
 			else
 				print("Country was not found...")
 			end
 		end
+		
+		searchField:removeSelf()
+		searchField = nil
+		
+		native.setKeyboardFocus(nil)
     end
 end
 
@@ -108,8 +157,18 @@ local function handleSearchButton( event )
 	
     if ( "ended" == event.phase ) then
 		
-		local searchField = native.newTextField( display.contentCenterX, g_iconSeparation[2], g_contentWidth - 30 - 4 * ( g_iconSeparation[1] + g_iconSize ), 50 )
-		searchField:addEventListener( "userInput", onSearch )
+		if searchField then
+			searchField:removeSelf()
+			searchField = nil
+			
+			native.setKeyboardFocus(nil)
+		else
+			searchField = native.newTextField( display.contentCenterX, g_iconSeparation[2], g_contentWidth - 30 - 4 * ( g_iconSeparation[1] + g_iconSize ), 50 )
+			searchField.placeholder = "Search for country..."
+			searchField:addEventListener( "userInput", onSearch )
+			
+			native.setKeyboardFocus(searchField)
+		end
     end
 end
 
@@ -140,6 +199,31 @@ local function handleInfoButton( event )
 		
 		
 		shiftMap()
+		
+		if g_currentUser ~= nil and g_currentCountry ~= nil then
+			if editButton.isVisible == true then
+				editButton.isVisible = false
+			else
+				editButton.isVisible = true
+			end
+		end
+	end
+end
+
+
+---------------------------------------------------------------------
+-- EDIT BUTTON
+---------------------------------------------------------------------
+-- Function to handle button events
+local function handleEditButton( event )
+	
+    if ( "ended" == event.phase ) then
+        print("Edit Button was pressed!")
+		
+		-- just to make sure that admin is logged in
+		if g_currentUser ~= nil then
+			print("GOING TO EDIT PAGE")
+		end
 	end
 end
 
@@ -153,9 +237,14 @@ local function handleBackButton( event )
     if ( "ended" == event.phase ) then
         print("Back button was pressed!")
 		
-		if g_currentRegion ~= 'World' then
-			loadMap('World')
-			loadInformation('World')
+		if g_currentRegion ~= 'World' or g_currentCountry ~= nil then
+			g_currentRegion = 'World'
+			g_currentCountry = nil
+			
+			g_mapView_hidden = false
+			
+			loadMap(g_currentRegion)
+			loadInformation(g_currentRegion, g_currentCountry)
 		end
 	end
 end
@@ -170,15 +259,31 @@ function scene:create( event )
 	
 	sceneGroup:insert(infoContainer)
 	
-	local infoBackground = display.newRect(g_mapView_defaultCoordinates[1], g_mapView_defaultCoordinates[2], g_mapView_size[1], g_mapView_size[2])
+	--[[local infoBackground = display.newRect(g_mapView_defaultCoordinates[1], g_mapView_defaultCoordinates[2], g_mapView_size[1], g_mapView_size[2])
 	infoBackground:setFillColor(0.5)
 	
-	sceneGroup:insert(infoBackground)
+	sceneGroup:insert(infoBackground)]]--
 	
 	info_Region = display.newText('Legal Climates around the World', display.contentCenterX, g_iconSeparation[2], native.systemFont, 16)
 	info_Region:setFillColor(1,1,1)
 	
 	infoContainer:insert(info_Region)
+	
+	-- country detail information
+	info_Details = display.newText("Please click on a country to view it's details.", display.contentCenterX - ( g_contentWidth / 4 ) , g_mapView_defaultCoordinates[2], ( g_mapView_size[1] / 2 ) - 50, g_mapView_size[2] - 50, native.systemFont, 16 )
+	info_Details.align = "left"
+	
+	info_Details:setFillColor(1, 0, 0)
+	
+	infoContainer:insert(info_Details)
+	
+	-- additional information
+	info_Additional = display.newText("...", display.contentCenterX + ( g_contentWidth / 4 ) , g_mapView_defaultCoordinates[2], ( g_mapView_size[1] / 2 ) - 50, g_mapView_size[2] - 50, native.systemFont, 16 )
+	info_Additional.align = "left"
+	
+	info_Additional:setFillColor(1, 1, 1)
+	
+	infoContainer:insert(info_Additional)
 	
 	-- Back button
 	local backButton = widget.newButton(
@@ -202,8 +307,8 @@ function scene:create( event )
 		{
 			width = g_iconSize,
 			height = g_iconSize,
-			defaultFile = "edit-icon.png",
-			overFile = "edit-icon.png",
+			defaultFile = "info-icon.png",
+			overFile = "info-icon.png",
 			onEvent = handleInfoButton
 		}
 	)
@@ -247,6 +352,26 @@ function scene:create( event )
 	searchButton.y = g_iconSeparation[2]
 	
 	sceneGroup:insert(searchButton)
+	
+	-- Edit button
+	editButton = widget.newButton(
+		{
+			width = g_iconSize,
+			height = g_iconSize,
+			defaultFile = "edit-icon.png",
+			overFile = "edit-icon.png",
+			onEvent = handleEditButton
+		}
+	)
+
+	-- place the button
+	editButton.x = g_contentWidth - g_iconSize - g_iconSeparation[2]
+	editButton.y = g_contentHeight - g_iconSeparation[2]
+	
+	editButton.isVisible = false
+	
+	sceneGroup:insert(editButton)
+	
 end
 
 function scene:show( event )

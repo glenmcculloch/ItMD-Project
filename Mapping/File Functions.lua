@@ -38,12 +38,8 @@ function loadCountryData(region, country)
 				
 				if s[1] == "Additional Information" then
 					result[s[1]] = s[2]
-				elseif s[2] == "0" then
-					result[s[1]] = 0
-				elseif s[2] == "1" then
-					result[s[1]] = 1
-				elseif s[2] == "2" then
-					result[s[1]] = 2
+				else
+					result[s[1]] = tonumber(s[2])
 				end
 			end
 		end
@@ -83,27 +79,19 @@ function saveCountryData(region, country)
 	file = nil
 end
 
--- Function that searches for a specific country and returns either nil or a table
-function searchForCountry(country, region)
+-- Function that searches for a specific country and returns either nil or a table of that country's characteristics
+function searchForCountry(country)
 	local result
 	
-	-- search through specific region
-	if region == 'World' then
-		for key,value in pairs(g_countries) do
-			for key_2,value_2 in pairs(value) do
-				if string.lower(key_2) == string.lower(country) then
-					result = {key, key_2}
-					break
-				end
-			end
-		end
-	else
-		-- search through all regions
-		for key,value in pairs(g_countries[region]) do
-			if string.lower(key) == string.lower(country) then
-				result = {region, key}
-				break
-			end
+	-- capitalises each first letter and the rest to lower case (matches our countries datastructure)
+	country = string.gsub(" "..string.lower(country), "%W%l", string.upper):sub(2)
+	print(country)
+	
+	-- search through all regions for country
+	for key,value in pairs(g_countries) do
+		if g_countries[key][country] ~= nil then
+			result = {key, country}
+			break
 		end
 	end
 	
@@ -185,6 +173,7 @@ function createWorldMap()
 			},
 			backgroundColor: '#000000',
 			legend: 'none',
+			tooltip: {trigger: 'none'},
 			width: %d, 
 			height: %d, 
 			keepAspectRatio: false
@@ -280,6 +269,7 @@ function createRegionMap(region)
 			displayMode: 'regions',
 			datalessRegionColor: '#0000FF',
 			defaultColor: '#000000',
+			tooltip: {trigger: 'none'},
 			legend: 'none',
 			keepAspectRatio: true
 		};
@@ -292,9 +282,9 @@ function createRegionMap(region)
 		-- start looping through all countries within that region
 		for key, value in pairs(g_countries) do
 			if key == region then
-				for key, value in pairs(value) do
+				for key_2, value_2 in pairs(value) do
 					line = string.format([[,
-			['%s', %i] ]], key, math.random(0,10))
+			['%s', %s] ]], key_2, g_countries[key][key_2]['Rating'])
 					
 					file:write(line)
 				end
