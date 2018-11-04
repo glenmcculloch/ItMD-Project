@@ -42,32 +42,30 @@ function loadCountryData(country)
 		local info = ""
 		
 		for line in io.lines(path) do
-			if line:len() ~= 0 then
-				-- start reading information in
-				if line == "[info]" then
-					-- stop reading information
-					if isInfo then
-						g_countries[country]['info'] = info
-						isInfo = false
-					else
-						isInfo = true
-					end
-				-- reading information in
-				elseif isInfo then
-					info = info..line
-					print(info)
-				-- normal characteristic, read it in
+			-- start reading information in
+			if line == "[info]" then
+				-- stop reading information
+				if isInfo then
+					g_countries[country]['info'] = info
+					isInfo = false
 				else
-					data = split(line, "=")
-					
-					characteristic = data[1]
-					value = data[2]
-					
-					if characteristic == 'Rating' then
-						g_countries[country]['rating'] = tonumber(value)
-					else
-						g_countries[country]['data'][characteristic] = tonumber(value)
-					end
+					isInfo = true
+				end
+			-- reading information in
+			elseif isInfo then
+				info = info..line
+				print(info)
+			-- normal characteristic, read it in
+			else
+				data = split(line, "=")
+				
+				characteristic = data[1]
+				value = data[2]
+				
+				if characteristic == 'Rating' then
+					g_countries[country]['rating'] = tonumber(value)
+				else
+					g_countries[country]['data'][characteristic] = tonumber(value)
 				end
 			end
 		end

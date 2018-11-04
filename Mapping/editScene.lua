@@ -91,7 +91,9 @@ end
 local function handleSaveButton( event )
 	
     if ( "ended" == event.phase ) then
-		-- save the data!
+		-- get textbox text!
+		selectionInfo = infoAdditional.text
+		
 		local success = saveCountryData(g_currentCountry, selectionRating, selectionData, selectionInfo)
 		
 		if success == true then
