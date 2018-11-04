@@ -131,7 +131,7 @@ function scene:create( event )
 		text = "Administrator Login", 
 		x = display.contentCenterX, 
 		y = display.contentCenterY, 
-		font = native.systemFont, 
+		font = native.systemFontBold, 
 		fontSize = 16, 
 		align = "center"
 	})
@@ -139,20 +139,34 @@ function scene:create( event )
 	sceneGroup:insert(loginText)
 	
 	loginButton = widget.newButton({
-		x = display.contentCenterX - 50,
-		y = display.contentCenterY + 60,
+		x = display.contentCenterX - 60,
+		y = display.contentCenterY + 75,
+		width = 90,
+		height = 25,
 		id = "login",
 		label = "Login",
+		cornerRadius = 5,
+		shape = "roundedRect", 
+		fillColor = { default={1,1,1,0.5}, over={1,1,1,0.5} },
+		strokeColor = { default={1,1,1,0.9}, over={1,1,1,0.9} },
+		strokeWidth = 3, 
 		onEvent = handleLoginButton
 	})
 	
 	sceneGroup:insert(loginButton)
 	
 	cancelButton = widget.newButton({
-		x = display.contentCenterX + 50,
-		y = display.contentCenterY + 60,
+		x = display.contentCenterX + 60,
+		y = display.contentCenterY + 75,
+		width = 90,
+		height = 25,
 		id = "cancel",
 		label = "Cancel",
+		cornerRadius = 5,
+		shape = "roundedRect", 
+		fillColor = { default={1,1,1,0.5}, over={1,1,1,0.5} },
+		strokeColor = { default={1,1,1,0.9}, over={1,1,1,0.9} },
+		strokeWidth = 3, 
 		onEvent = handleCancelButton
 	})
 	
@@ -183,14 +197,14 @@ function scene:show( event )
 		
 		-- only create fields if we're logging in
 		if g_currentUser == nil then
-			usernameField = native.newTextField( display.contentCenterX, display.contentCenterY - 20, 220, 36 )
-			usernameField.font = native.newFont( native.systemFontBold, 24 )
+			usernameField = native.newTextField( display.contentCenterX, display.contentCenterY - 25, g_contentWidth * 0.4, 40 )
+			usernameField.font = native.newFont( native.systemFontBold, 16 )
 			usernameField.placeholder = "Username"
 			usernameField:setTextColor( 0.4, 0.4, 0.8 )
 			usernameField:addEventListener( "userInput", onUsername )
 			
-			passwordField = native.newTextField( display.contentCenterX, display.contentCenterY + 20, 220, 36 )
-			passwordField.font = native.newFont( native.systemFontBold, 24 )
+			passwordField = native.newTextField( display.contentCenterX, display.contentCenterY + 25, g_contentWidth * 0.4, 40  )
+			passwordField.font = native.newFont( native.systemFontBold, 16 )
 			passwordField.placeholder = "Password"
 			passwordField.isSecure = true
 			passwordField:setTextColor( 0.4, 0.4, 0.8 )

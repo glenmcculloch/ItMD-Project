@@ -70,7 +70,6 @@ createWorldMap()
 
 -- Create all map files!
 for key,value in pairs(g_regionId) do
-	print(string.format("Creating region map (%s)", key))
 	createRegionMap(key)
 end
 

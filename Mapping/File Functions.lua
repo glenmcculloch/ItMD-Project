@@ -6,11 +6,11 @@
 
 -- Function to split a string given a token
 function split(s, token)
-    result = {};
+    result = {}
     for match in (s..token):gmatch("(.-)"..token) do
-        table.insert(result, match);
+        table.insert(result, match)
     end
-    return result;
+    return result
 end
 
 -- capitalises the first letter of every word in a string
@@ -204,7 +204,7 @@ function createWorldMap()
 				var selectedRow = selection[0].row;
 				var selectedRegion = data.getFormattedValue(selection[0].row, 1);
 				
-				var link = "region:" + selectedRegion;
+				var link = ":" + selectedRegion;
 				
 				document.getElementById("region").href=link;
 				document.getElementById("region").click();
@@ -220,7 +220,7 @@ function createWorldMap()
 	<div id="geochart-colors"></div>
 	<a id="region" href=""></a>
   </body>
-</html>]], g_mapView_size[1] - 10, g_mapView_size[2] - 10)
+</html>]], g_mapView_size[1], g_mapView_size[2])
 		
 		file:write(line)
 		file:close()
@@ -312,7 +312,7 @@ function createRegionMap(region)
 				var selectedRow = selection[0].row;
 				var selectedRegion = data.getFormattedValue(selection[0].row, 0);
 				
-				var link = "country:" + selectedRegion;
+				var link = ":" + selectedRegion;
 				
 				document.getElementById("country").href=link;
 				document.getElementById("country").click();

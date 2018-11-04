@@ -36,7 +36,7 @@ function scene:create( event )
 
     local sceneGroup = self.view
 	
-	local background = display.newRect( display.contentCenterX, display.contentCenterY, 0.5 * g_contentWidth, 0.5 * g_contentHeight )
+	local background = display.newRect( display.contentCenterX, display.contentCenterY, g_contentWidth, g_contentHeight )
 	background:setFillColor('black')
 	
 	sceneGroup:insert(background)
@@ -50,6 +50,7 @@ function scene:create( event )
 			width = 100,
 			height = 30,
 			cornerRadius = 5,
+			shape = "roundedRect", 
 			fillColor = { default={1,1,1,0.5}, over={1,1,1,0.5} },
 			strokeColor = { default={1,1,1,0.9}, over={1,1,1,0.9} },
 			strokeWidth = 4, 

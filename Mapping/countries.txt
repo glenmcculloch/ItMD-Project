@@ -52,7 +52,6 @@ Uganda:Africa:UG
 Western Sahara:Africa:EH
 Zambia:Africa:ZM
 Zimbabwe:Africa:ZW
-
 Antigua and Barbuda:Americas:AG
 Argentina:Americas:AR
 Bahamas:Americas:BS
@@ -88,7 +87,6 @@ Trinidad and Tobago:Americas:TT
 United States of America:Americas:US
 Uruguay:Americas:UY
 Venezuala:Americas:VE
-
 Afghanistan:Asia:AF
 Armenia:Asia:AM
 Azerbaijan:Asia:AZ
@@ -139,7 +137,6 @@ United Arab Emirates:Asia:AE
 Uzbekistan:Asia:UZ
 Vietnam:Asia:VN
 Yemen:Asia:YE
-
 Albania:Europe:AL
 Andorra:Europe:AD
 Armenia:Europe:AM
@@ -191,7 +188,6 @@ Turkey:Europe:TR
 Ukraine:Europe:UA
 United Kingdom:Europe:GB
 Vatican City:Europe:VA
-
 Australia:Oceania:AU
 Fiji:Oceania:FJ
 Kiribati:Oceania:KI

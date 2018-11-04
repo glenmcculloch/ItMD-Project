@@ -142,22 +142,22 @@ function webViewListener(event)
 
 	-- a region was clicked
 	if event.url and event.type == "other" then
-		local data = string.gsub(event.url, "%%20", " ")
-		data = split(data, ":")
-		
+		local line = string.gsub(event.url, "%%20", " ")
+		local data = split(line, ":")
 		local selected = data[2]
+		
+		print(selected)
 		
 		-- check if it was a region that was selected, or a country
 		if g_regionId[selected] ~= nil then
 			g_currentRegion = selected
 			loadMap(g_currentRegion)
+			
 		-- if it was not a region, set country selected
 		else
 			g_currentCountry = g_codeToCountry[selected]
 			loadMap(g_currentCountry)
 		end
-		
-		loadInformation(g_currentRegion, g_currentCountry)
 	end
 end
 
@@ -169,7 +169,7 @@ local searchField
 local function onSearch( event )
 	
     if ( event.phase == "began" ) then
-        -- User begins editing "defaultField"
+        searchField.text = event.target.text
 	
     elseif ( event.phase == "submitted" ) then
 	
@@ -209,7 +209,7 @@ local function handleSearchButton( event )
 			
 			native.setKeyboardFocus(nil)
 		else
-			searchField = native.newTextField( display.contentCenterX, g_iconSeparation[2], g_contentWidth - 30 - 4 * ( g_iconSeparation[1] + g_iconSize ), 50 )
+			searchField = native.newTextField( display.contentCenterX, g_iconSeparation[2], g_contentWidth * 0.5, g_iconSize )
 			searchField.placeholder = "Search for country..."
 			searchField:addEventListener( "userInput", onSearch )
 			
@@ -381,6 +381,8 @@ function scene:create( event )
 	-- Back button
 	local backButton = widget.newButton(
 		{
+			x = g_contentWidth - g_iconSize * 2,
+			y = g_iconSeparation[2],
 			width = g_iconSize,
 			height = g_iconSize,
 			defaultFile = "back-icon.png",
@@ -388,9 +390,9 @@ function scene:create( event )
 			onEvent = handleBackButton
 		}
 	)
-
+	
 	-- place the button
-	backButton.x = g_contentWidth - 30 - g_iconSize - g_iconSeparation[1]
+	backButton.x = g_contentWidth - g_iconSize * 2
 	backButton.y = g_iconSeparation[2]
 	
 	sceneGroup:insert(backButton)
@@ -398,6 +400,8 @@ function scene:create( event )
 	-- Edit button
 	local infoButton = widget.newButton(
 		{
+			x = backButton.x - g_iconSeparation[1] - g_iconSize,
+			y = g_iconSeparation[2],
 			width = g_iconSize,
 			height = g_iconSize,
 			defaultFile = "info-icon.png",
@@ -405,16 +409,14 @@ function scene:create( event )
 			onEvent = handleInfoButton
 		}
 	)
-
-	-- place the button
-	infoButton.x = g_contentWidth - 30 - 2 * ( g_iconSize + g_iconSeparation[1] )
-	infoButton.y = g_iconSeparation[2]
 	
 	sceneGroup:insert(infoButton)
 	
 	-- Login button
 	local loginButton = widget.newButton(
 		{
+			x = 0,
+			y = g_iconSeparation[2],
 			width = g_iconSize,
 			height = g_iconSize,
 			defaultFile = "user-icon.png",
@@ -423,15 +425,13 @@ function scene:create( event )
 		}
 	)
 	
-	-- place the button
-	loginButton.x = 0
-	loginButton.y = g_iconSeparation[2]
-	
 	sceneGroup:insert(loginButton)
 	
 	-- search button
 	local searchButton = widget.newButton(
 		{
+			x = loginButton.x + g_iconSize + g_iconSeparation[1],
+			y = g_iconSeparation[2],
 			width = g_iconSize,
 			height = g_iconSize,
 			defaultFile = "search-icon.png",
@@ -440,15 +440,13 @@ function scene:create( event )
 		}
 	)
 	
-	-- place the button
-	searchButton.x = 0 + g_iconSize + g_iconSeparation[1]
-	searchButton.y = g_iconSeparation[2]
-	
 	sceneGroup:insert(searchButton)
 	
 	-- Edit button
 	editButton = widget.newButton(
 		{
+			x = g_contentWidth - g_iconSize - g_iconSeparation[2],
+			y = g_contentHeight - g_iconSeparation[2],
 			width = g_iconSize,
 			height = g_iconSize,
 			defaultFile = "edit-icon.png",
@@ -457,10 +455,6 @@ function scene:create( event )
 		}
 	)
 
-	-- place the button
-	editButton.x = g_contentWidth - g_iconSize - g_iconSeparation[2]
-	editButton.y = g_contentHeight - g_iconSeparation[2]
-	
 	editButton.isVisible = false
 	
 	sceneGroup:insert(editButton)
