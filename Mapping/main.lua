@@ -10,6 +10,7 @@ local composer = require( "composer" )
 g_admins = {}
 g_countries = {}
 g_countryCodes = {}
+g_codeToCountry = {}
 
 g_regionId = {
 	['Africa'] = '002', 
@@ -26,25 +27,15 @@ g_countrySetting = {
 }
 
 -- all country characteristics with default values
-g_countryCharacteristic = {
-	['Rating'] = 1, 
-	['Torture'] = 1, 
-	['Death Penalty'] = 1, 
-	['Conflict'] = 1, 
-	['State Oppression'] = 1, 
-	['Legal Torture'] = 1, 
-	['Additional Information'] = "..."
-}
-
 g_countryCharacteristics = {
-	[1] = {id='Rating', value=0},
-	[2] = {id='Torture', value=1},
-	[3] = {id='Death Penalty', value=1},
-	[4] = {id='Conflict', value=1},
-	[5] = {id='State Oppression', value=1},
-	[6] = {id='Legal Torture', value=1},
-	[7] = {id='Additional Information', value='...'}
+	[1] = {id='Rating', default=0},
+	[2] = {id='Torture', default=1},
+	[3] = {id='Death Penalty', default=1},
+	[4] = {id='Conflict', default=1},
+	[5] = {id='State Oppression', default=1},
+	[6] = {id='Legal Torture', default=1}
 }
+MAX_CHARACTERISTICS = 6
 
 -- Device content height and width
 g_contentHeight = display.actualContentHeight
@@ -74,12 +65,11 @@ g_iconSeparation = {10, 30}
 -----------------------------------------------------------------------------------------
 loadAdmins()
 loadCountries()
-loadCountryCodes()
 
 createWorldMap()
 
 -- Create all map files!
-for key,value in pairs(g_countries) do
+for key,value in pairs(g_regionId) do
 	print(string.format("Creating region map (%s)", key))
 	createRegionMap(key)
 end

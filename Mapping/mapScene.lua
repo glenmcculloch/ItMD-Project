@@ -24,36 +24,26 @@ function webViewListener(event)
 		local data = string.gsub(event.url, "%%20", " ")
 		data = split(data, ":")
 		
-		local selectedRegion = data[2]
+		local selected = data[2]
 		
 		-- check if it was a region that was selected, or a country
 		local isRegion = false
-		for key,value in pairs(g_countries) do
-			if key == selectedRegion then
+		for key,value in pairs(g_regionId) do
+			if key == selected then
 				isRegion = true
 			end
 		end
 		
 		-- load regional map if it was a region
 		if isRegion then
-			loadMap(selectedRegion)
-			g_currentRegion = selectedRegion
+			loadMap(selected)
+			g_currentRegion = selected
 		-- if it was not a region, set country selected
 		else
-			g_currentCountry = selectedRegion
+			g_currentCountry = g_codeToCountry[selected]
 		end
 		
 		loadInformation(g_currentRegion, g_currentCountry)
-	end
-end
-
-function shiftMap()
-	if g_mapView_hidden == false then
-		g_mapView_hidden = true
-		transition.moveTo(mapView, { x=g_mapView_hideCoordinates[1], y=g_mapView_hideCoordinates[2], time=g_transitionTime })
-	else
-		g_mapView_hidden = false
-		transition.moveTo(mapView, { x=g_mapView_defaultCoordinates[1], y=g_mapView_defaultCoordinates[2], time=g_transitionTime })
 	end
 end
 
@@ -80,20 +70,22 @@ function loadInformation(region, country)
 		info_Additional.text = ""
 	-- country is selected, load the details!
 	elseif country ~= nil then
-		info_Region.text = string.format("%s - Rating: %s", country, g_countries[region][country]['Rating'])
+		info_Region.text = string.format("%s - Rating: %s", country, g_countries[country]['rating'])
 		
+		local data
 		local line = "Country Characteristics:\n"
 		
 		-- start looping through all characteristics for this country
-		for key, value in pairs(g_countryCharacteristic) do
-			if key ~= 'Rating' and key ~= 'Additional Information' then
-				print(key .. " - " .. g_countrySetting[g_countries[region][country][key]])
-				line = line .. '\n' .. key .. " - " .. g_countrySetting[g_countries[region][country][key]]
+		for i = 1, MAX_CHARACTERISTICS, 1 do
+			data = g_countryCharacteristics[i]
+			
+			if data.id ~= 'Rating' then
+				line = line .. '\n' .. data.id .. " - " .. g_countrySetting[g_countries[country]['data'][data.id]]
 			end
 		end
 		
 		info_Details.text = line
-		info_Additional.text = "Information:\n\n" .. g_countries[region][country]['Additional Information']
+		info_Additional.text = "Information:\n\n" .. g_countries[country]['info']
 	else
 		info_Region.text = string.format("%s", region)
 	end
@@ -191,8 +183,6 @@ end
 local function handleLoginButton( event )
 	
     if ( "ended" == event.phase ) then
-        print("Login Button was pressed!")
-		
 		composer.removeScene("mainScene")
 		composer.gotoScene("loginScene")
     end
@@ -206,10 +196,7 @@ end
 local function handleInfoButton( event )
 	
     if ( "ended" == event.phase ) then
-        print("Info Button was pressed!")
-		
-		--shiftMap()
-		composer.gotoScene("editScene")
+		shiftMap()
 	end
 end
 
@@ -221,8 +208,6 @@ end
 local function handleEditButton( event )
 	
     if ( "ended" == event.phase ) then
-        print("Edit Button was pressed!")
-		
 		-- just to make sure that admin is logged in
 		if g_currentUser ~= nil then
 			composer.gotoScene("editScene")
@@ -238,8 +223,6 @@ end
 local function handleBackButton( event )
 	
     if ( "ended" == event.phase ) then
-        print("Back button was pressed!")
-		
 		if g_currentRegion ~= 'World' or g_currentCountry ~= nil then
 			g_currentRegion = 'World'
 			g_currentCountry = nil
@@ -404,7 +387,8 @@ function scene:show( event )
  
     if ( phase == "will" ) then
         -- Code here runs when the scene is still off screen (but is about to come on screen)
- 
+		g_mapView_hidden = false
+		
     elseif ( phase == "did" ) then
         -- Code here runs when the scene is entirely on screen
 		loadMap(g_currentRegion)

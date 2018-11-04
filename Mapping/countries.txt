@@ -42,7 +42,7 @@ Seychelles:Africa:SC
 Sierra Leone:Africa:SL
 Somalia:Africa:SO
 South Africa:Africa:ZA
-South Sudan:SS
+South Sudan:Africa:SS
 Sudan:Africa:SD
 Swaziland:Africa:SZ
 Tanzania:Africa:TZ

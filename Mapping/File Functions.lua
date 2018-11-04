@@ -13,6 +13,11 @@ function split(s, token)
     return result;
 end
 
+-- capitalises the first letter of every word in a string
+function capitalise(s)
+	return string.gsub(" "..string.lower(s), "%W%l", string.upper):sub(2)
+end
+
 
 -----------------------------------------------------------------------------------------
 --
@@ -22,81 +27,101 @@ end
 
 -- Function to load specific country settings from file
 --  (if not found it defaults to nil for each characteristic)
-function loadCountryData(region, country)
+function loadCountryData(country)
 	local path = system.pathForFile(string.format("%s.data", country), system.DocumentsDirectory)
 	local file, errorString = io.open(path, "r")
 	
-	local result = {}
-
+	-- initialise our data structure
+	g_countries[country]['data'] = {}
+	g_countries[country]['info'] = "..."
+	g_countries[country]['rating'] = 0
+	
 	if file then
-		print("FOUND FILE")
-		local s
-		local characteristic
-		local value
+		local data, characteristic, value
+		local isInfo = false
+		local info = ""
+		
 		for line in io.lines(path) do
 			if line:len() ~= 0 then
-				-- split the line (format characteristic=value)
-				s = split(line, "=")
-				characteristic = s[1]
-				value = s[2]
-				
-				if characteristic == "Additional Information" then
-					result[characteristic] = value
+				-- start reading information in
+				if line == "[info]" then
+					-- stop reading information
+					if isInfo then
+						g_countries[country]['info'] = info
+						isInfo = false
+					else
+						isInfo = true
+					end
+				-- reading information in
+				elseif isInfo then
+					info = info..line
+					print(info)
+				-- normal characteristic, read it in
 				else
-					result[characteristic] = tonumber(value)
+					data = split(line, "=")
+					
+					characteristic = data[1]
+					value = data[2]
+					
+					if characteristic == 'Rating' then
+						g_countries[country]['rating'] = tonumber(value)
+					else
+						g_countries[country]['data'][characteristic] = tonumber(value)
+					end
 				end
 			end
 		end
 		io.close(file)
 	else
-		result = g_countryCharacteristic
+		-- initialise values to nil if we can't load from file
+		for key,value in pairs(g_countryCharacteristics) do
+			g_countries[country]['data'][value.id] = value.default
+		end
 	end
 	
 	file = nil
-	return result
 end
 
 -- Function to load countries from file (for searches and saved data)
-function saveCountryData(region, country)
+function saveCountryData(country, rating, data, info)
 	local path = system.pathForFile(string.format("%s.data", country), system.DocumentsDirectory)
 	local file, errorString = io.open(path, "w")
-
+	
 	if not file then
 		print("File error: " .. errorString)
+		
+		return false
 	else
-		local line
-		for key,value in pairs(g_countries[region][country]) do
-			if key == "Additional Information" then
-				file:write(string.format("Additional Information=%s", value))
-			elseif value == nil then
-				file:write(string.format("%s=nil", key))
-			elseif value == true then
-				file:write(string.format("%s=true", key))
-			elseif value == false then
-				file:write(string.format("%s=false", key))
-			end
+		file:write(string.format("Rating=%s\n", rating))
+		
+		for key,value in pairs(data) do
+			file:write(string.format("%s=%d\n", key, value))
 		end
+		
+		file:write(string.format("[info]\n%s\n[info]", info))
 		
 		file:close()
 	end
 	
 	file = nil
+	
+	g_countries[country]['rating'] = rating
+	g_countries[country]['data'] = data
+	g_countries[country]['info'] = info
+	
+	return true
 end
 
 -- Function that searches for a specific country and returns either nil or a table of that country's characteristics
 function searchForCountry(country)
 	local result
 	
-	-- capitalises each first letter and the rest to lower case (matches our countries datastructure)
-	country = string.gsub(" "..string.lower(country), "%W%l", string.upper):sub(2)
-	print(country)
+	-- capitalises each first letter and the rest to lower case (matches our countries data structure)
+	country = capitalise(country)
 	
 	-- search through all regions for country
-	for key,value in pairs(g_countries) do
-		if g_countries[key][country] ~= nil then
-			result = {key, country}
-			break
-		end
+	if g_countries[country] ~= nil then
+		result = {g_countries[country].region, country}
 	end
 	
 	return result
@@ -113,25 +138,6 @@ function setCountryData(region, country, characteristic)
 	countries[region][country][characteristic] = deathpenalty_field_value
 	...
 	saveCountryData(region, country)
-	]]--
-end
-
--- This function is used to determine a country's rating depending on its characteristics
---  WE NEED TO GET CHARACTERISTIC VALUES FROM THE CLIENT TO COMPLETE THIS
---   RIGHT NOW RATINGS ARE DETERMINED RANDOMLY ON APPLICATION STARTUP
-function getCountryRating(region, country)
-	-- default rating is 0 (no data)
-	local rating = 0
-	
-	--[[CODE TO ADD (EXAMPLE)
-	
-	if torture_present then
-		rating = ???
-	elseif incarceration_present then
-		rating = ???
-	end
-	
-	return rating
 	]]--
 end
 
@@ -279,19 +285,17 @@ function createRegionMap(region)
 		};
 		
 		var data = google.visualization.arrayToDataTable([
-			['Country', 'Rating'] ]], g_regionId[region], g_contentHeight)
+			['Region', 'Country', 'Rating'] ]], g_regionId[region], g_contentHeight)
 		
 		file:write(line)
 		
 		-- start looping through all countries within that region
-		for key, value in pairs(g_countries) do
-			if key == region then
-				for key_2, value_2 in pairs(value) do
-					line = string.format([[,
-			['%s', %s] ]], key_2, g_countries[key][key_2]['Rating'])
-					
-					file:write(line)
-				end
+		for key,value in pairs(g_countries) do
+			if value.region == region then
+				line = string.format([[,
+			["%s", "%s", %d] ]], value.code, value.name, value.rating)
+				
+				file:write(line)
 			end
 		end
 		
@@ -335,55 +339,36 @@ end
 
 -- Function to load countries from file (for searches and saved data)
 function loadCountries()
-	local path = system.pathForFile("countryList.txt", system.ResourceDirectory)
+	local path = system.pathForFile("countries.txt", system.ResourceDirectory)
 	local file, errorString = io.open(path, "r")
 
 	if not file then
 		print("File error: " .. errorString)
 	else
-		local region
+		local data
+		local country, region, code
 		-- iterate through each line in the file
 		for line in io.lines(path) do
 			-- length is 0, ignore this line
 			if line:len() ~= 0 then
 				-- line includes a region
-				if string.find(line, "%[") ~= nil then
-					-- remove [ and ]
-					line = string.gsub(line, "%[", '')
-					line = string.gsub(line, "%]", '')
-					
-					region = line
-					
-					-- initialise region table
-					g_countries[region] = {}
-				elseif region ~= nil then
-					g_countries[region][line] = loadCountryData(region, line)
-				end
-			end
-		end
-		io.close( file )
-	end
-	
-	file = nil
-end
-
--- Function to load countries from file (for searches and saved data)
-function loadCountryCodes()
-
-	local path = system.pathForFile("country_codes.txt", system.ResourceDirectory)
-	local file, errorString = io.open(path, "r")
-
-	if not file then
-		print("File error: " .. errorString)
-	else
-		local line, data
-		-- iterate through each line in the file
-		for line in io.lines(path) do
-			-- length is 0, ignore this line
-			if line:len() ~= 0 then
 				data = split(line, ":")
 				
-				g_countryCodes[data[1]] = data[2]
+				country = data[1]
+				region = data[2]
+				code = data[3]
+				
+				g_countries[country] = {
+					name=country, 
+					region=region, 
+					code=code
+				}
+				
+				loadCountryData(country)
+				
+				-- this will be used to easily find a country given it's country code
+				--  (like a reverse lookup table)
+				g_codeToCountry[code] = country
 			end
 		end
 		io.close( file )
@@ -391,7 +376,7 @@ function loadCountryCodes()
 	
 	file = nil
 end
---country = {name: "", code: "", characteristics: "", information: "", region: ""}
+
 -- Function to load all admins from the file into the application
 function loadAdmins()
 

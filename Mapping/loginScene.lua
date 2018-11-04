@@ -20,6 +20,10 @@ local options = {
     isModal = true
 }
 
+
+---------------------------------------------------------------------
+-- SPECIFIC FUNCTIONS
+---------------------------------------------------------------------
 local function openOverlay(type)
 	if usernameField then
 		usernameField.isVisible = false
