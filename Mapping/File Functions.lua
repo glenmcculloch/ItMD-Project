@@ -204,7 +204,7 @@ function createWorldMap()
 				var selectedRow = selection[0].row;
 				var selectedRegion = data.getFormattedValue(selection[0].row, 1);
 				
-				var link = ":" + selectedRegion;
+				var link = "region:" + selectedRegion;
 				
 				document.getElementById("region").href=link;
 				document.getElementById("region").click();
@@ -217,7 +217,7 @@ function createWorldMap()
 	</script>
   </head>
   <body style="background:black">
-	<div id="geochart-colors"></div>
+	<div style="margin:auto" id="geochart-colors"></div>
 	<a id="region" href=""></a>
   </body>
 </html>]], g_mapView_size[1], g_mapView_size[2])
@@ -312,7 +312,7 @@ function createRegionMap(region)
 				var selectedRow = selection[0].row;
 				var selectedRegion = data.getFormattedValue(selection[0].row, 0);
 				
-				var link = ":" + selectedRegion;
+				var link = "country:" + selectedRegion;
 				
 				document.getElementById("country").href=link;
 				document.getElementById("country").click();
@@ -325,7 +325,7 @@ function createRegionMap(region)
 	</script>
   </head>
   <body style="background:black">
-	<div id="geochart-colors"></div>
+	<div id="geochart-colors" style="margin:auto"></div>
 	<a id="country" href=""></a>
   </body>
 </html>]])
@@ -411,7 +411,7 @@ function createCountryMap(country)
 	</script>
   </head>
   <body style="background:black">
-	<div style="align: center" id="geochart-colors"></div>
+	<div style="margin:auto" id="geochart-colors"></div>
 	<a id="country" href=""></a>
   </body>
 </html>]])
