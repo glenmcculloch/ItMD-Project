@@ -45,6 +45,7 @@ g_contentWidth = display.actualContentWidth
 g_currentUser = nil
 g_currentRegion = 'World'
 g_currentCountry = nil
+g_currentState = 'world'
 
 -- Setup our map details
 g_mapView_size = {g_contentWidth, g_contentHeight - (g_contentHeight / 8)}
