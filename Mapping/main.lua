@@ -74,6 +74,10 @@ for key,value in pairs(g_regionId) do
 	createRegionMap(key)
 end
 
+for key,value in pairs(g_countries) do
+	createCountryMap(key)
+end
+
 --local editDetails_container = display.newRect(g_editView_defaultCoordinates[1], g_editView_defaultCoordinates[2], g_editView_size[1], g_editView_size[2])
 --editDetails_container.fill = {0.3,0.3,0.3,1}
 

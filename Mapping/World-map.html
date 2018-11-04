@@ -14,46 +14,40 @@
 	
 	function drawVisualisation() {
 		var options = {
-			region: 'world',
-			resolution: 'continents', 
+			region: 'AU',
+			resolution: 'countries',
 			colorAxis: {
 			colors: [
-				'red', // 1
-				'orange', // 2
-				'cyan', // 3
-				'purple', // 4
-				'yellow', // 5
+				'#FFFFFF', // 0
+				'#00853F', // 1
+				'#3F9B39', // 2
+				'#7FB234', // 3
+				'#BFC82E', // 4
+				'#BFC82E', // 5
+				'#F8AE27', // 6
+				'#F8AE27', // 7
+				'#F17D26', // 8
+				'#EA4C24', // 9
+				'#E31B23', // 10
 				], 
-				values: [1,2,3,4,5]
+				values: [0,1,2,3,4,5,6,7,8,9,10]
 			},
 			backgroundColor: '#000000',
+			displayMode: 'regions',
+			datalessRegionColor: '#0000FF',
+			defaultColor: '#000000',
+			tooltip: {trigger: 'none'},
 			legend: 'none',
-			height: %d, 
-			keepAspectRatio: true
+			keepAspectRatio: true,
+			width: 320
 		};
+		
 		var data = google.visualization.arrayToDataTable([
-			['Region code', 'Continent', 'Value'] ,
-			['002', 'Africa', 1] ,
-			['150', 'Europe', 2] ,
-			['019', 'Americas', 3] ,
-			['142', 'Asia', 4] ,
-			['009', 'Oceania', 5]
+			['Region code', 'Country', 'Rating'], 
+			['AU', 'Australia', '0']
 		]);
 		
 		var chart = new google.visualization.GeoChart(document.getElementById('geochart-colors'));
-		
-		google.visualization.events.addListener(chart, 'select', function(e) {
-			var selection = chart.getSelection();
-			if (selection.length == 1) {
-				var selectedRow = selection[0].row;
-				var selectedRegion = data.getFormattedValue(selection[0].row, 1);
-				
-				var link = "region:" + selectedRegion;
-				
-				document.getElementById("region").href=link;
-				document.getElementById("region").click();
-			}
-		});
 		
 		chart.draw(data, options);
 	}
@@ -62,6 +56,6 @@
   </head>
   <body style="background:black">
 	<div id="geochart-colors"></div>
-	<a id="region" href=""></a>
+	<a id="country" href=""></a>
   </body>
 </html>

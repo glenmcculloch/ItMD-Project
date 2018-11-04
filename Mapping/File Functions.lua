@@ -107,6 +107,7 @@ function saveCountryData(country, rating, data, info)
 	g_countries[country]['data'] = data
 	g_countries[country]['info'] = info
 	
+	createCountryMap(country)
 	return true
 end
 
@@ -279,11 +280,12 @@ function createRegionMap(region)
 			defaultColor: '#000000',
 			tooltip: {trigger: 'none'},
 			legend: 'none',
+			width: %d,
 			keepAspectRatio: true
 		};
 		
 		var data = google.visualization.arrayToDataTable([
-			['Region', 'Country', 'Rating'] ]], g_regionId[region], g_contentHeight)
+			['Region', 'Country', 'Rating'] ]], g_regionId[region], 1000)
 		
 		file:write(line)
 		
@@ -326,7 +328,93 @@ function createRegionMap(region)
 	<div id="geochart-colors"></div>
 	<a id="country" href=""></a>
   </body>
-</html>]], 1000, 500)
+</html>]])
+		
+		file:write(line)
+		file:close()
+	end
+	
+	file = nil
+end
+
+-- Function that creates an html page for our webview. This will be saved in documents directory
+function createCountryMap(country)
+	local path = system.pathForFile(string.format("%s-map.html", country), system.DocumentsDirectory)
+	local file, errorString = io.open(path, "w")
+
+	if not file then
+		print("File error: " .. errorString)
+	else
+		local line
+		
+		-- initial startup line
+		line = string.format([[
+<html>
+  <head>
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	
+	<script type="text/javascript">
+	  google.charts.load('current', {
+		'packages':['geochart'],
+		// Note: you will need to get a mapsApiKey for your project.
+		// See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings
+		'mapsApiKey': 'AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY'
+	  });
+	google.charts.setOnLoadCallback(drawVisualisation);
+	
+	function drawVisualisation() {
+		var options = {
+			region: '%s',
+			resolution: 'countries',
+			colorAxis: {
+			colors: [
+				'#FFFFFF', // 0
+				'#00853F', // 1
+				'#3F9B39', // 2
+				'#7FB234', // 3
+				'#BFC82E', // 4
+				'#BFC82E', // 5
+				'#F8AE27', // 6
+				'#F8AE27', // 7
+				'#F17D26', // 8
+				'#EA4C24', // 9
+				'#E31B23', // 10
+				], 
+				values: [0,1,2,3,4,5,6,7,8,9,10]
+			},
+			backgroundColor: '#000000',
+			displayMode: 'regions',
+			datalessRegionColor: '#0000FF',
+			defaultColor: '#000000',
+			tooltip: {trigger: 'none'},
+			legend: 'none',
+			keepAspectRatio: true,
+			width: %s
+		};
+		
+		var data = google.visualization.arrayToDataTable([
+			['Region code', 'Country', 'Rating'], 
+			['%s', '%s', %d]
+		]);]], g_countries[country].code, g_contentHeight, g_countries[country].code, country, g_countries[country].rating)
+		
+		file:write(line)
+		
+		-- end of file stuff
+		line = string.format([[
+		
+		var chart = new google.visualization.GeoChart(document.getElementById('geochart-colors'));
+		
+		chart.draw(data, options);
+	}
+	
+	</script>
+  </head>
+  <body style="background:black">
+	<div style="align: center" id="geochart-colors"></div>
+	<a id="country" href=""></a>
+  </body>
+</html>]])
 		
 		file:write(line)
 		file:close()

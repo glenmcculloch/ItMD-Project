@@ -40,38 +40,9 @@ function scene:closeOverlay()
 	composer.hideOverlay( "fade", 400 )
 end
 
--- Function to listen to the webview and register any clicks on the map
-function webViewListener(event)
+function loadWebView(region)
+	g_mapView_hidden = false
 
-	-- a region was clicked
-	if event.url and event.type == "other" then
-		local data = string.gsub(event.url, "%%20", " ")
-		data = split(data, ":")
-		
-		local selected = data[2]
-		
-		-- check if it was a region that was selected, or a country
-		local isRegion = false
-		for key,value in pairs(g_regionId) do
-			if key == selected then
-				isRegion = true
-			end
-		end
-		
-		-- load regional map if it was a region
-		if isRegion then
-			loadMap(selected)
-			g_currentRegion = selected
-		-- if it was not a region, set country selected
-		else
-			g_currentCountry = g_codeToCountry[selected]
-		end
-		
-		loadInformation(g_currentRegion, g_currentCountry)
-	end
-end
-
-function loadMap(region)
 	-- remove mapview if it exists already (needed to reload the map)
 	if mapView then
 		mapView:removeSelf()
@@ -132,8 +103,19 @@ function loadInformation(region, country)
 	end
 end
 
+function loadMap()
+	if g_currentCountry ~= nil then
+		loadWebView(g_currentCountry)
+	else
+		loadWebView(g_currentRegion)
+	end
+	
+	loadInformation(g_currentRegion, g_currentCountry)
+end
+
 function shiftMap()
 
+	-- display map
 	if g_mapView_hidden == false then
 		g_mapView_hidden = true
 		transition.moveTo(mapView, { x=g_mapView_hideCoordinates[1], y=g_mapView_hideCoordinates[2], time=g_transitionTime })
@@ -142,6 +124,8 @@ function shiftMap()
 		if g_currentCountry ~= nil and g_currentUser ~= nil then
 			editButton.isVisible = true
 		end
+		
+	-- hide map
 	else
 		g_mapView_hidden = false
 		transition.moveTo(mapView, { x=g_mapView_defaultCoordinates[1], y=g_mapView_defaultCoordinates[2], time=g_transitionTime })
@@ -150,6 +134,30 @@ function shiftMap()
 		if editButton.isVisible then
 			editButton.isVisible = false
 		end
+	end
+end
+
+-- Function to listen to the webview and register any clicks on the map
+function webViewListener(event)
+
+	-- a region was clicked
+	if event.url and event.type == "other" then
+		local data = string.gsub(event.url, "%%20", " ")
+		data = split(data, ":")
+		
+		local selected = data[2]
+		
+		-- check if it was a region that was selected, or a country
+		if g_regionId[selected] ~= nil then
+			g_currentRegion = selected
+			loadMap(g_currentRegion)
+		-- if it was not a region, set country selected
+		else
+			g_currentCountry = g_codeToCountry[selected]
+			loadMap(g_currentCountry)
+		end
+		
+		loadInformation(g_currentRegion, g_currentCountry)
 	end
 end
 
@@ -171,20 +179,13 @@ local function onSearch( event )
 			-- found the country!
 			if result ~= nil then
 				
-				-- load map only if it is in a different region
-				if g_currentRegion ~= result[1] then
-					g_mapView_hidden = false
-					loadMap(result[1])
-				end
-				
 				-- same again, load information only if it isn't the same country
 				if g_currentCountry ~= result[1] then
-					loadInformation(result[1], result[2])
+					g_currentRegion = result[1]
+					g_currentCountry = result[2]
+					
+					loadMap()
 				end
-				
-				-- set our current region and country
-				g_currentRegion = result[1]
-				g_currentCountry = result[2]
 			else
 				openOverlay()
 			end
@@ -265,14 +266,15 @@ end
 local function handleBackButton( event )
 	
     if ( "ended" == event.phase ) then
-		if g_currentRegion ~= 'World' or g_currentCountry ~= nil then
-			g_currentRegion = 'World'
+		-- return to region from country
+		if g_currentCountry ~= nil then
 			g_currentCountry = nil
 			
-			g_mapView_hidden = false
-			
-			loadMap(g_currentRegion)
-			loadInformation(g_currentRegion, g_currentCountry)
+			loadMap()
+		-- return to world from region
+		elseif g_currentRegion ~= 'World' then
+			g_currentRegion = 'World'
+			loadMap()
 		end
 	end
 end
@@ -478,7 +480,7 @@ function scene:show( event )
 		
     elseif ( phase == "did" ) then
         -- Code here runs when the scene is entirely on screen
-		loadMap(g_currentRegion)
+		loadMap()
     end
 end
 
