@@ -1,7 +1,0 @@
-[Australia]
-torture=yes
-death_penalty=no
-conflict=yes
-state_oppression=no
-corporal_punishment=yes
-legal_torture=yes
