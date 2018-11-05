@@ -92,6 +92,9 @@ end
 -- Function to listen to the webview and register any clicks on the map
 local function webViewListener(event)
 	-- a region was clicked
+	print(event.url)
+	info_Additional.text = event.url
+	
 	if event.url and event.type == "other" then
 		local line = string.gsub(event.url, "%%20", " ")
 		local data = split(line, ":")
@@ -101,41 +104,11 @@ local function webViewListener(event)
 		if g_regionId[selected] ~= nil then
 			g_currentRegion = selected
 			loadInformation(g_currentRegion, g_currentCountry)
-			
-			g_mapView_hidden = false
-			
-			-- remove mapview if it exists already (needed to reload the map)
-			if mapView and mapView.removeSelf then
-				mapView:removeSelf()
-				mapView = nil
-			end
-			
-			-- request the correct map
-			mapView = native.newWebView( g_mapView_defaultCoordinates[1], g_mapView_defaultCoordinates[2], g_mapView_size[1], g_mapView_size[2] )
-			mapView:request( string.format("%s-map.html", g_currentRegion), system.DocumentsDirectory )
-			
-			mapView:addEventListener( "urlRequest", webViewListener )
 		-- if it was not a region, set country selected
 		else
-			local country = g_codeToCountry[selected]
-			
 			if g_countries[country] ~= nil then
 				g_currentCountry = country
 				loadInformation(g_currentRegion, g_currentCountry)
-				
-				g_mapView_hidden = false
-				
-				-- remove mapview if it exists already (needed to reload the map)
-				if mapView and mapView.removeSelf then
-					mapView:removeSelf()
-					mapView = nil
-				end
-				
-				-- request the correct map
-				mapView = native.newWebView( g_mapView_defaultCoordinates[1], g_mapView_defaultCoordinates[2], g_mapView_size[1], g_mapView_size[2] )
-				mapView:request( string.format("%s-map.html", g_currentCountry), system.DocumentsDirectory )
-				
-				mapView:addEventListener( "urlRequest", webViewListener )
 			end
 		end
 	end
@@ -162,7 +135,7 @@ function loadMap()
 	-- request the correct map
 	mapView = native.newWebView( g_mapView_defaultCoordinates[1], g_mapView_defaultCoordinates[2], g_mapView_size[1], g_mapView_size[2] )
 	mapView:request( string.format("%s-map.html", region), system.DocumentsDirectory )
-	
+	info_Additional.text = system.pathForFile(string.format("%s-map.html", region), system.DocumentsDirectory)
 	mapView:addEventListener( "urlRequest", webViewListener )
 end
 

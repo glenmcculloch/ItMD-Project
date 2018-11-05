@@ -204,10 +204,7 @@ function createWorldMap()
 				var selectedRow = selection[0].row;
 				var selectedRegion = data.getFormattedValue(selection[0].row, 1);
 				
-				var link = "region:" + selectedRegion;
-				
-				document.getElementById("region").href=link;
-				document.getElementById("region").click();
+				window.location.href = selectedRegion + "-map.html"
 			}
 		});
 		
@@ -310,12 +307,9 @@ function createRegionMap(region)
 			var selection = chart.getSelection();
 			if (selection.length == 1) {
 				var selectedRow = selection[0].row;
-				var selectedRegion = data.getFormattedValue(selection[0].row, 0);
+				var selectedRegion = data.getFormattedValue(selection[0].row, 1);
 				
-				var link = "country:" + selectedRegion;
-				
-				document.getElementById("country").href=link;
-				document.getElementById("country").click();
+				window.location.href = selectedRegion + "-map.html"
 			}
 		});
 		
