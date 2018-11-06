@@ -54,7 +54,6 @@ function loadCountryData(country)
 			-- reading information in
 			elseif isInfo then
 				info = info..line
-				print(info)
 			-- normal characteristic, read it in
 			else
 				data = split(line, "=")
@@ -142,7 +141,7 @@ end
 
 -- Function that creates an html page for our webview. This will be saved in documents directory
 function createWorldMap()
-	local path = system.pathForFile("World-map.html", system.DocumentsDirectory)
+	local path = system.pathForFile("World-map.html", system.TemporaryDirectory)
 	local file, errorString = io.open(path, "w")
 
 	if not file then
@@ -223,7 +222,7 @@ function createWorldMap()
 </html>]], g_mapView_size[1], g_mapView_size[2])
 		
 		file:write(line)
-		file:close()
+		io.close(file)
 	end
 	
 	file = nil
@@ -231,7 +230,7 @@ end
 
 -- Function that creates an html page for our webview. This will be saved in documents directory
 function createRegionMap(region)
-	local path = system.pathForFile(string.format("%s-map.html", region), system.DocumentsDirectory)
+	local path = system.pathForFile(string.format("%s-map.html", region), system.TemporaryDirectory)
 	local file, errorString = io.open(path, "w")
 
 	if not file then
@@ -281,26 +280,23 @@ function createRegionMap(region)
 			tooltip: {trigger: 'none'},
 			legend: 'none',
 			width: %d,
-			keepAspectRatio: true
+			height: %d,
+			keepAspectRatio: false
 		};
 		
 		var data = google.visualization.arrayToDataTable([
-			['Region', 'Country', 'Rating'] ]], g_regionId[region], 1000)
-		
-		file:write(line)
+			['Region', 'Country', 'Rating'] ]], g_regionId[region], g_mapView_size[1], g_mapView_size[2])
 		
 		-- start looping through all countries within that region
 		for key,value in pairs(g_countries) do
 			if value.region == region then
-				line = string.format([[,
+				line = line .. string.format([[,
 			["%s", "%s", %d] ]], value.code, value.name, value.rating)
-				
-				file:write(line)
 			end
 		end
 		
 		-- end of file stuff
-		line = string.format([[
+		line = line .. string.format([[
 		
 		]);
 		
@@ -310,7 +306,7 @@ function createRegionMap(region)
 			var selection = chart.getSelection();
 			if (selection.length == 1) {
 				var selectedRow = selection[0].row;
-				var selectedRegion = data.getFormattedValue(selection[0].row, 0);
+				var selectedRegion = data.getFormattedValue(selection[0].row, 1);
 				
 				var link = "country:" + selectedRegion;
 				
@@ -325,13 +321,13 @@ function createRegionMap(region)
 	</script>
   </head>
   <body style="background:black">
-	<div id="geochart-colors" style="margin:auto"></div>
+	<div id="geochart-colors"></div>
 	<a id="country" href=""></a>
   </body>
 </html>]])
-		
+
 		file:write(line)
-		file:close()
+		io.close(file)
 	end
 	
 	file = nil
@@ -339,7 +335,7 @@ end
 
 -- Function that creates an html page for our webview. This will be saved in documents directory
 function createCountryMap(country)
-	local path = system.pathForFile(string.format("%s-map.html", country), system.DocumentsDirectory)
+	local path = system.pathForFile(string.format("%s-map.html", country), system.TemporaryDirectory)
 	local file, errorString = io.open(path, "w")
 
 	if not file then
@@ -348,7 +344,7 @@ function createCountryMap(country)
 		local line
 		
 		-- initial startup line
-		line = string.format([[
+		line = line .. string.format([[
 <html>
   <head>
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -389,19 +385,18 @@ function createCountryMap(country)
 			defaultColor: '#000000',
 			tooltip: {trigger: 'none'},
 			legend: 'none',
-			keepAspectRatio: true,
-			width: %s
+			width: %d,
+			height: %d,
+			keepAspectRatio: false
 		};
 		
 		var data = google.visualization.arrayToDataTable([
 			['Region code', 'Country', 'Rating'], 
 			['%s', '%s', %d]
-		]);]], g_countries[country].code, g_contentHeight, g_countries[country].code, country, g_countries[country].rating)
-		
-		file:write(line)
+		]);]], g_countries[country].code, g_mapView_size[1], g_mapView_size[2], g_countries[country].code, country, g_countries[country].rating)
 		
 		-- end of file stuff
-		line = string.format([[
+		line = line .. string.format([[
 		
 		var chart = new google.visualization.GeoChart(document.getElementById('geochart-colors'));
 		
@@ -411,13 +406,12 @@ function createCountryMap(country)
 	</script>
   </head>
   <body style="background:black">
-	<div style="margin:auto" id="geochart-colors"></div>
-	<a id="country" href=""></a>
+	<div id="geochart-colors"></div>
   </body>
 </html>]])
 		
 		file:write(line)
-		file:close()
+		io.close(file)
 	end
 	
 	file = nil
@@ -451,10 +445,6 @@ function loadCountries()
 				}
 				
 				loadCountryData(country)
-				
-				-- this will be used to easily find a country given it's country code
-				--  (like a reverse lookup table)
-				g_codeToCountry[code] = country
 			end
 		end
 		io.close( file )

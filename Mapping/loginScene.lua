@@ -123,9 +123,7 @@ end
 -- Scene event functions
 -- -----------------------------------------------------------------------------------
 function scene:create( event )
-	print("SCENE IS BEING CREATED")
-
-    local sceneGroup = self.view
+	local sceneGroup = self.view
 	
 	loginText = display.newText({
 		text = "Administrator Login", 

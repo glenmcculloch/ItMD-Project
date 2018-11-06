@@ -17,10 +17,7 @@ local parent
 local function handleConfirmButton( event )
  
     if ( "ended" == event.phase ) then
-		print("CLICKED CONFIRM")
-		print(params.type)
 		if params.type == 'Login' or params.type == 'Logout' then
-			print("CLOSING OVERLAY")
 			parent:closeOverlay(true)
 		elseif params.type == 'Failed' then
 			parent:closeOverlay(false)

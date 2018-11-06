@@ -9,8 +9,6 @@ local composer = require( "composer" )
 -- holds all country data for our program
 g_admins = {}
 g_countries = {}
-g_countryCodes = {}
-g_codeToCountry = {}
 
 g_regionId = {
 	['Africa'] = '002', 
@@ -63,21 +61,36 @@ g_iconSeparation = {10, 30}
 -- Loading area
 --
 -----------------------------------------------------------------------------------------
+local loadingText = display.newText({
+	text = "Loading Application", 
+	x = display.contentCenterX, 
+	y = display.contentCenterY, 
+	font = native.systemFontBold, 
+	fontSize = 20
+})
+
 loadAdmins()
 loadCountries()
 
-createWorldMap()
-
--- Create all map files!
+--Create all map files!
 for key,value in pairs(g_regionId) do
 	createRegionMap(key)
 end
 
-for key,value in pairs(g_countries) do
-	createCountryMap(key)
+createWorldMap()
+
+-- for key,value in pairs(g_countries) do
+	-- createCountryMap(key)
+-- end
+
+local function startApplication( event )
+	loadingText:removeSelf()
+	loadingText = nil
+	composer.gotoScene("mapScene")
 end
 
-composer.gotoScene("mapScene")
+-- to make sure??? (doesn't seem to do anything
+timer.performWithDelay( 5000, startApplication )
 
 
 -----------------------------------------------------------------------------------------

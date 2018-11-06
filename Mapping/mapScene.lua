@@ -41,13 +41,32 @@ function scene:closeOverlay()
 	composer.hideOverlay( "fade", 400 )
 end
 
+local function reloadMap( event )
+	mapView:reload()
+end
+
+function readFile(map)
+	local path = system.pathForFile(string.format("%s-map.html", map), system.TemporaryDirectory)
+	local file, errorString = io.open(path, "r")
+	
+	if not file then
+		-- Error occurred; output the cause
+		print( "File error: " .. errorString )
+	else
+		info_Additional.text = file:read("*a")
+		io.close(file)
+	end
+	
+	file = nil
+end
+
 -- loads information into the background when a region/country is clicked
-function loadInformation(region, country)
+local function loadInformation(region, country)
 	
 	-- world information (load details)
 	if region == 'World' then
 		info_Region.text = "Legal Climates around the World"
-		info_Additional.text = "Please click on a country to display its details."
+		info_Additional.text = "Please click a country to view details."
 		
 		-- iterate through each characteristic and create info buttons and info labels
 		for i = 1, MAX_CHARACTERISTICS, 1 do
@@ -90,83 +109,77 @@ function loadInformation(region, country)
 end
 
 -- Function to listen to the webview and register any clicks on the map
-local function webViewListener(event)
+local function regionListener(event)
+
 	-- a region was clicked
-	if event.url and event.type == "other" then
+	if event.url and event.type == 'other' then
 		local line = string.gsub(event.url, "%%20", " ")
 		local data = split(line, ":")
-		local selected = data[2]
 		
-		-- check if it was a region that was selected, or a country
-		if g_regionId[selected] ~= nil then
-			g_currentRegion = selected
+		if data[1] == 'country' then
+			g_currentCountry = data[2]
 			loadInformation(g_currentRegion, g_currentCountry)
 			
-			g_mapView_hidden = false
+			event.target:removeSelf()
 			
-			-- remove mapview if it exists already (needed to reload the map)
-			if mapView and mapView.removeSelf then
-				mapView:removeSelf()
-				mapView = nil
-			end
-			
-			-- request the correct map
-			mapView = native.newWebView( g_mapView_defaultCoordinates[1], g_mapView_defaultCoordinates[2], g_mapView_size[1], g_mapView_size[2] )
-			mapView:request( string.format("%s-map.html", g_currentRegion), system.DocumentsDirectory )
-			
-			mapView:addEventListener( "urlRequest", webViewListener )
-		-- if it was not a region, set country selected
-		else
-			local country = g_codeToCountry[selected]
-			
-			if g_countries[country] ~= nil then
-				g_currentCountry = country
-				loadInformation(g_currentRegion, g_currentCountry)
-				
-				g_mapView_hidden = false
-				
-				-- remove mapview if it exists already (needed to reload the map)
-				if mapView and mapView.removeSelf then
-					mapView:removeSelf()
-					mapView = nil
-				end
-				
-				-- request the correct map
-				mapView = native.newWebView( g_mapView_defaultCoordinates[1], g_mapView_defaultCoordinates[2], g_mapView_size[1], g_mapView_size[2] )
-				mapView:request( string.format("%s-map.html", g_currentCountry), system.DocumentsDirectory )
-				
-				mapView:addEventListener( "urlRequest", webViewListener )
-			end
+			mapView = native.newWebView(g_mapView_defaultCoordinates[1], g_mapView_defaultCoordinates[2], g_mapView_size[1], g_mapView_size[2])
+			mapView:request(string.format("%s-map.html", data[2]), system.DocumentsDirectory)
 		end
 	end
 end
 
-function loadMap()
-	local region
+-- Function to listen to the webview and register any clicks on the map
+local function worldListener(event)
+	
+	-- a region was clicked
+	if event.url and event.type == 'other' then
+		local line = string.gsub(event.url, "%%20", " ")
+		local data = split(line, ":")
+		
+		if data[1] == 'region' then
+			g_currentRegion = data[2]
+			loadInformation(g_currentRegion, g_currentCountry)
+			
+			event.target:removeSelf()
+			
+			mapView = native.newWebView(g_mapView_defaultCoordinates[1], g_mapView_defaultCoordinates[2], g_mapView_size[1], g_mapView_size[2])
+			mapView:request(string.format("%s-map.html", data[2]), system.DocumentsDirectory)
+			
+			mapView:addEventListener("urlRequest", regionListener)
+		end
+	end
+end
+
+local function loadMap()
 	loadInformation(g_currentRegion, g_currentCountry)
 	
-	if g_currentCountry ~= nil then
-		region = g_currentCountry
-	else
-		region = g_currentRegion
-	end
-	
-	g_mapView_hidden = false
-
-	-- remove mapview if it exists already (needed to reload the map)
 	if mapView and mapView.removeSelf then
 		mapView:removeSelf()
 		mapView = nil
 	end
 	
-	-- request the correct map
-	mapView = native.newWebView( g_mapView_defaultCoordinates[1], g_mapView_defaultCoordinates[2], g_mapView_size[1], g_mapView_size[2] )
-	mapView:request( string.format("%s-map.html", region), system.DocumentsDirectory )
+	g_mapView_hidden = false
 	
-	mapView:addEventListener( "urlRequest", webViewListener )
+	if g_currentCountry ~= nil then
+		mapView = native.newWebView(g_mapView_defaultCoordinates[1], g_mapView_defaultCoordinates[2], g_mapView_size[1], g_mapView_size[2])
+		mapView:request(string.format("%s-map.html", g_currentCountry), system.TemporaryDirectory)
+		
+	elseif g_currentRegion ~= 'World' then
+		mapView = native.newWebView(g_mapView_defaultCoordinates[1], g_mapView_defaultCoordinates[2], g_mapView_size[1], g_mapView_size[2])
+		mapView:request(string.format("%s-map.html", g_currentRegion), system.TemporaryDirectory)
+		
+		mapView:addEventListener("urlRequest", regionListener)
+		
+	else
+		mapView = native.newWebView(g_mapView_defaultCoordinates[1], g_mapView_defaultCoordinates[2], g_mapView_size[1], g_mapView_size[2])
+		mapView:request("World-map.html", system.TemporaryDirectory)
+		
+		mapView:addEventListener("urlRequest", worldListener)
+		
+	end
 end
 
-function shiftMap()
+local function shiftMap()
 
 	-- display map
 	if g_mapView_hidden == false then
@@ -262,7 +275,7 @@ end
 
 
 ---------------------------------------------------------------------
--- EDIT BUTTON
+-- INFO BUTTON
 ---------------------------------------------------------------------
 -- Function to handle button events
 local function handleInfoButton( event )
@@ -295,15 +308,19 @@ end
 local function handleBackButton( event )
 	
     if ( "ended" == event.phase ) then
+	
 		-- return to region from country
 		if g_currentCountry ~= nil then
 			g_currentCountry = nil
 			
 			loadMap()
+			
 		-- return to world from region
 		elseif g_currentRegion ~= 'World' then
 			g_currentRegion = 'World'
+			
 			loadMap()
+			
 		end
 	end
 end
@@ -489,10 +506,10 @@ function scene:show( event )
     local phase = event.phase
  
     if ( phase == "will" ) then
-        -- Code here runs when the scene is still off screen (but is about to come on screen)
+        --[[ Code here runs when the scene is still off screen (but is about to come on screen) ]]--
 		
     elseif ( phase == "did" ) then
-        -- Code here runs when the scene is entirely on screen
+        --[[ Code here runs when the scene is entirely on screen ]]--
 		loadMap()
     end
 end
@@ -502,18 +519,20 @@ function scene:hide( event )
     local phase = event.phase
  
     if ( phase == "will" ) then
-        -- Code here runs when the scene is on screen (but is about to go off screen)
+        --[[ Code here runs when the scene is on screen (but is about to go off screen) ]]--
+		
+		-- remove all native maps
 		if mapView and mapView.removeSelf then
-            mapView:removeSelf()
-            mapView = nil
-        end
+			mapView:removeSelf()
+			mapView = nil
+		end
 		
 		if searchField and searchField.removeSelf then
 			searchField:removeSelf()
 			searchField = nil
 		end
     elseif ( phase == "did" ) then
-        -- Code here runs immediately after the scene goes entirely off screen
+        --[[ Code here runs immediately after the scene goes entirely off screen ]]--
  
     end
 end

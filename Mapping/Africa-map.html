@@ -1,0 +1,127 @@
+<html>
+  <head>
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	
+	<script type="text/javascript">
+	  google.charts.load('current', {
+		'packages':['geochart'],
+		// Note: you will need to get a mapsApiKey for your project.
+		// See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings
+		'mapsApiKey': 'AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY'
+	  });
+	google.charts.setOnLoadCallback(drawVisualisation);
+	
+	function drawVisualisation() {
+		var options = {
+			region: '002',
+			colorAxis: {
+			colors: [
+				'#FFFFFF', // 0
+				'#00853F', // 1
+				'#3F9B39', // 2
+				'#7FB234', // 3
+				'#BFC82E', // 4
+				'#BFC82E', // 5
+				'#F8AE27', // 6
+				'#F8AE27', // 7
+				'#F17D26', // 8
+				'#EA4C24', // 9
+				'#E31B23', // 10
+				], 
+				values: [0,1,2,3,4,5,6,7,8,9,10]
+			},
+			backgroundColor: '#000000',
+			displayMode: 'regions',
+			datalessRegionColor: '#0000FF',
+			defaultColor: '#000000',
+			tooltip: {trigger: 'none'},
+			legend: 'none',
+			width: 568,
+			height: 280,
+			keepAspectRatio: false
+		};
+		
+		var data = google.visualization.arrayToDataTable([
+			['Region', 'Country', 'Rating'] ,
+			["GA", "Gabon", 0] ,
+			["KE", "Kenya", 0] ,
+			["ST", "Sao Tome and Principe", 0] ,
+			["CM", "Cameroon", 0] ,
+			["CI", "Cote D'ivoire", 0] ,
+			["MG", "Madagascar", 0] ,
+			["BW", "Botswana", 0] ,
+			["BF", "Burkina Faso", 0] ,
+			["SN", "Senegal", 0] ,
+			["ER", "Eritrea", 0] ,
+			["GM", "Gambia", 0] ,
+			["SL", "Sierra Leone", 0] ,
+			["NG", "Nigeria", 0] ,
+			["SS", "South Sudan", 0] ,
+			["SO", "Somalia", 0] ,
+			["TN", "Tunisia", 0] ,
+			["MU", "Mauritius", 0] ,
+			["NA", "Namibia", 0] ,
+			["KM", "Comoros", 0] ,
+			["GN", "Guinea", 0] ,
+			["RW", "Rwanda", 0] ,
+			["CD", "Congo, the Democratic Republic of the", 0] ,
+			["NE", "Niger", 0] ,
+			["LR", "Liberia", 0] ,
+			["EH", "Western Sahara", 0] ,
+			["TG", "Togo", 0] ,
+			["BJ", "Benin", 0] ,
+			["LY", "Libya", 0] ,
+			["BI", "Burundi", 0] ,
+			["ZM", "Zambia", 0] ,
+			["GH", "Ghana", 0] ,
+			["EG", "Egypt", 0] ,
+			["MZ", "Mozambique", 0] ,
+			["MW", "Malawi", 0] ,
+			["DJ", "Djibouti", 0] ,
+			["SC", "Seychelles", 0] ,
+			["GW", "Guinea-Bissau", 0] ,
+			["CF", "Central African Republic", 0] ,
+			["TZ", "Tanzania", 0] ,
+			["SD", "Sudan", 0] ,
+			["MA", "Morocco", 0] ,
+			["ML", "Mali", 0] ,
+			["MR", "Mauritania", 0] ,
+			["GQ", "Equatorial Guinea", 0] ,
+			["UG", "Uganda", 0] ,
+			["LS", "Lesotho", 0] ,
+			["TD", "Chad", 0] ,
+			["DZ", "Algeria", 0] ,
+			["ZW", "Zimbabwe", 0] ,
+			["CV", "Cape Verde", 0] ,
+			["ZA", "South Africa", 0] ,
+			["SZ", "Swaziland", 0] ,
+			["AO", "Angola", 0] ,
+			["ET", "Ethiopia", 0] 		
+		]);
+		
+		var chart = new google.visualization.GeoChart(document.getElementById('geochart-colors'));
+		
+		google.visualization.events.addListener(chart, 'select', function(e) {
+			var selection = chart.getSelection();
+			if (selection.length == 1) {
+				var selectedRow = selection[0].row;
+				var selectedRegion = data.getFormattedValue(selection[0].row, 1);
+				
+				var link = "country:" + selectedRegion;
+				
+				document.getElementById("country").href=link;
+				document.getElementById("country").click();
+			}
+		});
+		
+		chart.draw(data, options);
+	}
+	
+	</script>
+  </head>
+  <body style="background:black">
+	<div id="geochart-colors"></div>
+	<a id="country" href=""></a>
+  </body>
+</html>
